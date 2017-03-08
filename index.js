@@ -11,7 +11,7 @@ var client = nforce.createConnection({
   mode: 'multi' // optional, 'single' or 'multi' user mode, multi default
 });
 
-var oauth;
+var oauth = 'no_token_yet';
 client.authenticate({ username: process.env.SFDC_USERNAME, password: process.env.SFDC_PASSWORD }, function( err, resp ) {
   // store the oauth object for this user
   if(!err) oauth = resp;
