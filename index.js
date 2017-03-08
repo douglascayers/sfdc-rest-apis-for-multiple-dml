@@ -1,5 +1,6 @@
 var nforce = require('nforce');
 var request = require('request');
+var express = require('express');
 
 var client = nforce.createConnection({
   clientId: process.env.SFDC_CLIENT_KEY,
@@ -16,3 +17,14 @@ client.authenticate({ username: process.env.SFDC_USERNAME, password: process.env
   if(!err) oauth = resp;
 });
 
+var app = express();
+
+app.get('/', function ( req, res ) {
+
+
+
+    res.send('Hello World');
+
+});
+
+app.listen( process.env.PORT || 80 );
