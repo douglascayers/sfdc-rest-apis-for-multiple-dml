@@ -2,6 +2,7 @@
  * Example Apex REST web service for creating multiple objects via API.
  *
  * Developed by Doug Ayers (douglascayers.com)
+ * https://github.com/DouglasCAyers/nashville-sfdc-apex-rest
  */
 @RestResource( urlMapping = '/v1/service/*')
 global class MyApexRestService {
@@ -17,6 +18,8 @@ global class MyApexRestService {
         System.debug( 'saving data' );
         System.debug( requests );
 
+        SavePoint sp = Database.setSavepoint();
+
         List<Response> responses = new List<Response>();
 
         try {
@@ -27,7 +30,10 @@ global class MyApexRestService {
             for ( Integer i = 0; i < requests.size(); i++ ) {
 
                 newAccounts.add( new Account(
-                    name = requests[i].company
+                    name = requests[i].company,
+                    billingStreet = requests[i].street,
+                    billingCity = requests[i].city,
+                    billingState = requests[i].state
                 ));
 
             }
@@ -39,7 +45,10 @@ global class MyApexRestService {
                 newContacts.add( new Contact(
                     accountId = newAccounts[i].id,
                     firstName = requests[i].firstName,
-                    lastName = requests[i].lastName
+                    lastName = requests[i].lastName,
+                    mailingStreet = requests[i].street,
+                    mailingCity = requests[i].city,
+                    mailingState = requests[i].state
                 ));
 
             }
@@ -60,6 +69,8 @@ global class MyApexRestService {
 
         } catch ( Exception e ) {
 
+            Database.rollback( sp );
+
             System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
 
             Response res = new Response();
@@ -68,7 +79,7 @@ global class MyApexRestService {
             res.message = e.getMessage();
             res.detailMessage = e.getStackTraceString();
 
-            responses.add( res );
+            responses = new List<Response>{ res };
 
         }
 
@@ -80,6 +91,9 @@ global class MyApexRestService {
         global String firstName;
         global String lastName;
         global String company;
+        global String street;
+        global String city;
+        global String state;
 
     }
 
