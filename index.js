@@ -37,11 +37,18 @@ var app = express();
 
 app.set( 'json spaces', 4 ); // pretty print json
 
+app.use( express.static( 'public' ) );
+
+app.get( '/', function( req, res ) {
+    res.redirect( '/index.html' );
+});
+
 /*
     Custom Apex REST API
 
+    https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST
     https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_intro.htm
-    https://github.com/DouglasCAyers/nashville-sfdc-apex-rest/blob/master/src/classes/MyApexRestService.cls
+    https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml/blob/master/src/classes/MyApexRestService.cls
  */
 app.get( '/custom', function ( req, res ) {
 
@@ -85,6 +92,7 @@ app.get( '/custom', function ( req, res ) {
 /*
     Composite REST API
 
+    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
     https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
 
     Executes a series of REST API requests in a single call.
@@ -191,6 +199,7 @@ app.get( '/composite2', function ( req, res ) {
 /*
     SObject Tree REST API
 
+    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
     https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
 
     Creates one or more sObject trees with root records of the specified type.

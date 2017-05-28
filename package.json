@@ -1,10 +1,14 @@
 {
-  "name": "nashville-sfdc-apex-rest",
+  "name": "sfdc-rest-apis-multiple-dml",
   "version": "1.0.0",
-  "description": "Example calling Apex Rest service on Salesforce.",
+  "description": "Tour of Salesforce REST APIs for Multiple DML in Single Request - Midwest Dreamin' 2017",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Doug Ayers, Rob Goldiez",
   "license": "MIT",
@@ -12,5 +16,11 @@
     "express": "^4.15.2",
     "nforce": "^1.7.0",
     "request": "^2.80.0"
-  }
+  },
+  "keywords": [
+    "saleforce",
+    "midwest dreamin",
+    "apex",
+    "rest"
+  ]
 }
