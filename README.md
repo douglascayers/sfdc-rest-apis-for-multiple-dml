@@ -33,7 +33,8 @@ TODO insert image
 git clone https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml.git
 cd sfdc-rest-apis-for-multiple-dml
 ```
-4. In the project folder, create file named `.env` that includes the following properties:
+4. Create or deploy the apex class `/src/classes/MyApexRestService.cls` in your org
+5. In the project folder, create file named `.env` that includes the following properties:
 ```
 SFDC_CLIENT_KEY=your connected app key
 SFDC_CLIENT_SECRET=your connected app secret
@@ -41,5 +42,5 @@ SFDC_PASSWORD=your salesforce password
 SFDC_TOKEN=your salesforce token
 SFDC_USERNAME=your salesforce username
 ```
-5. Run the app locally via `heroku local`
-6. In your browser go to http://localhost:5000/
+6. Run the app locally via `heroku local`
+7. In your browser go to http://localhost:5000/
