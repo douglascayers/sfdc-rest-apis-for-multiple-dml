@@ -2,34 +2,32 @@
 // Load libraries
 // ==============================================
 
-var dotenv = require('dotenv');
-var nforce = require('nforce');
-var request = require('request');
-var express = require('express');
-var exphbs = require('express-handlebars');
-
-dotenv.config(); // if not running via 'heroku local' this ensures the .env file is loaded
+var dotenv = require('dotenv').config(); // necessary if running via 'node app.js' instead of 'heroku local'
+var jsforce = require('jsforce'); // fabulous library for accessing salesforce! https://jsforce.github.io
+var express = require('express'); // turn our nodejs app into a web server
+var exphbs = require('express-handlebars'); // for html templating responses
 
 // ==============================================
-// Create nforce client to connect to Salesforce
+// Configure variables
 // ==============================================
 
-var client = nforce.createConnection({
-    clientId: process.env.SFDC_CLIENT_KEY,
-    clientSecret: process.env.SFDC_CLIENT_SECRET,
-    redirectUri: 'http://localhost',
-    apiVersion: 'v39.0',  // optional, defaults to current salesforce API version
-    environment: 'production',  // optional, salesforce 'sandbox' or 'production', production default
-    mode: 'multi' // optional, 'single' or 'multi' user mode, multi default
+var conn = new jsforce.Connection({
+    oauth2 : {
+        clientId : process.env.SFDC_CLIENT_KEY,
+        clientSecret : process.env.SFDC_CLIENT_SECRET
+    }
 });
 
-var oauth = 'no_token_yet';
-client.authenticate({ username: process.env.SFDC_USERNAME, password: process.env.SFDC_PASSWORD + process.env.SFDC_TOKEN }, function( err, resp ) {
-    console.log( err );
-    console.log( resp );
-    // store the oauth object for this user
-    if(!err) oauth = resp;
+conn.login( process.env.SFDC_USERNAME, process.env.SFDC_PASSWORD + process.env.SFDC_TOKEN, function( err, res ) {
+    if ( err ) {
+        console.error( err );
+        process.exit(1);
+    }
+    console.log( res );
 });
+
+var webPageTitle = 'Tour of Salesforce REST APIs for Multiple DML in Single Request';
+var webAppName = 'Midwest Dreamin 2017';
 
 
 // ==============================================
@@ -40,18 +38,29 @@ var app = express();
 
 app.set( 'json spaces', 4 ); // pretty print json
 
+app.listen( process.env.PORT || 80 );
+
 app.use( express.static( __dirname + '/public' ) );
 
 app.engine( 'handlebars', exphbs( { defaultLayout: 'main' } ) );
 app.set( 'view engine', 'handlebars' );
 
+
+// ==============================================
+// Configure web app endpoints
+// ==============================================
+
+/*
+    Home Page
+ */
 app.get( '/', function( req, res ) {
     res.render( 'home', {
-        'title' : 'Tour of Salesforce REST APIs for Multiple DML in Single Request',
-        'app.name' : 'Midwest Dreamin 2017',
+        'title' : webPageTitle,
+        'app.name' : webAppName,
         'tabHomeSelected' : true
     });
 });
+
 
 /*
     Custom Apex REST API
@@ -59,47 +68,32 @@ app.get( '/', function( req, res ) {
     https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST
     https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_intro.htm
     https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml/blob/master/src/classes/MyApexRestService.cls
+
+    Executes a single API request to a custom Apex REST service.
+    The apex class creates a new Account and Contact based on the arguments.
+    If any error then the method rollsback the entire transaction for an "all or none" result.
  */
-app.get( '/api/custom', function ( req, res ) {
+app.get( '/api/apex', function ( req, res ) {
 
-    var url = oauth.instance_url + '/services/apexrest/v1/service/';
+    conn.apex.post( '/v1/service/', {
+        'request' : {
 
-    var data = {
-        'requests' : [
-            {
-                'firstName' : 'Marc',
-                'lastName' : 'Benioff',
-                'company' : 'Salesforce',
-                'street' : '1 Market Street',
-                'city' : 'San Francisco',
-                'state' : 'California'
-            },
-            {
-                'firstName' : 'Parker',
-                'lastName' : 'Harris',
-                'company' : 'Salesforce',
-                'street' : '1 Market Street',
-                'city' : 'San Francisco',
-                'state' : 'California'
-            }
-        ]
-    };
+            'firstName' : 'Marc',           // contact.firstName
+            'lastName' : 'Benioff',         // contact.lastName
 
-    var headerData = {
-        'Authorization' : 'Bearer ' + oauth.access_token
-    };
+            'company' : 'Salesforce',       // account.name
+            'street' : '1 Market Street',   // account.billingStreet
+            'city' : 'San Francisco',       // account.billingCity
+            'state' : 'California'          // account.billingState
 
-    request.post( { url: url, json: true, body: data, headers: headerData }, function( err, httpResponse, body ) {
-
-        console.log( JSON.stringify( body, null, 2 ) );
-
-        //res.send( body );
+        }
+    }, function( error, response ) {
 
         res.render( 'api_response', {
-            'title' : 'Tour of Salesforce REST APIs for Multiple DML in Single Request',
-            'app.name' : 'Midwest Dreamin 2017',
-            'tabCustomSelected' : true,
-            'jsonResponse' : JSON.stringify( body, null, 2 )
+            'title' : webPageTitle,
+            'app.name' : webAppName,
+            'tabApexSelected' : true,
+            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
     });
@@ -107,7 +101,7 @@ app.get( '/api/custom', function ( req, res ) {
 });
 
 /*
-    Composite REST API
+    Composite REST API (example 1)
 
     https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
     https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
@@ -119,107 +113,87 @@ app.get( '/api/custom', function ( req, res ) {
  */
 app.get( '/api/composite', function ( req, res ) {
 
-    var url = oauth.instance_url + '/services/data/v39.0/composite/';
+    var path = '/services/data/v39.0';
 
-    var data = {
+    conn.requestPost( path + '/composite', {
         'allOrNone' : true,
         'compositeRequest' : [
             {
                 'method' : 'POST',
-                'url' : '/services/data/v39.0/sobjects/Account',
-                'referenceId' : 'RamseyAccount',
+                'url' : path + '/sobjects/Account',
+                'referenceId' : 'GearsAccount',
                 'body' : {
-                    'Name' : 'Ramsey Conference Center',
-                    'BillingStreet' : '7104 Crossroads Blvd, Suite 105',
-                    'BillingCity' : 'Franklin',
-                    'BillingState' : 'Tennessee'
+                    'Name' : 'GearsCRM',
+                    'BillingStreet' : '10 Kearney Road, Suite 152',
+                    'BillingCity' : 'Needham',
+                    'BillingState' : 'Massachusetts'
                 }
             },
             {
                 'method' : 'POST',
-                'url' : '/services/data/v39.0/sobjects/Contact',
-                'referenceId' : 'RamseyContact',
+                'url' : path + '/sobjects/Contact',
+                'referenceId' : 'GearsContact',
                 'body' : {
-                    'AccountId' : '@{RamseyAccount.id}',
-                    'FirstName' : 'Dave',
-                    'LastName' : 'Ramsey'
+                    'AccountId' : '@{GearsAccount.id}',
+                    'FirstName' : 'Harry',
+                    'LastName' : 'Radenberg'
                 }
             }
         ]
-    };
-
-    var headerData = {
-        'Authorization' : 'Bearer ' + oauth.access_token
-    };
-
-    request.post( { url: url, json: true, body: data, headers: headerData }, function( err, httpResponse, body ) {
-
-        console.log( JSON.stringify( body, null, 2 ) );
-
-        //res.send( body );
+    }, function( error, response ) {
 
         res.render( 'api_response', {
-            'title' : 'Tour of Salesforce REST APIs for Multiple DML in Single Request',
-            'app.name' : 'Midwest Dreamin 2017',
+            'title' : webPageTitle,
+            'app.name' : webAppName,
             'tabCompositeSelected' : true,
-            'jsonResponse' : JSON.stringify( body, null, 2 )
+            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
     });
 
 });
 
-// example of querying for data and piping that into subsequent requests
+
+/*
+    Composite REST API (example 2)
+
+    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
+    https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
+
+    First request queries for existing account then
+    subsequent request creates a new contact at that account.
+    Again, the entire request counts as a single call toward your API limits.
+ */
 app.get( '/api/composite2', function ( req, res ) {
 
-    var url = oauth.instance_url + '/services/data/v39.0/composite/';
+    var path = '/services/data/v39.0';
 
-    var data = {
+    conn.requestPost( path + '/composite', {
         'allOrNone' : true,
         'compositeRequest' : [
             {
                 'method' : 'GET',
-                'url' : '/services/data/v39.0/query/?q=' + "SELECT id FROM Account WHERE name = 'Ramsey Conference Center' ORDER BY CreatedDate DESC LIMIT 1".replace(/( )+/g, '+' ),
+                'url' : path + '/query/?q=' + "SELECT id FROM Account WHERE name = 'GearsCRM' ORDER BY CreatedDate DESC LIMIT 1".replace(/( )+/g, '+' ),
                 'referenceId' : 'AccountResults'
             },
             {
                 'method' : 'POST',
-                'url' : '/services/data/v39.0/sobjects/Contact',
-                'referenceId' : 'NewMarkContact',
+                'url' : path + '/sobjects/Contact',
+                'referenceId' : 'NewContact',
                 'body' : {
                     'AccountId' : '@{AccountResults.records[0].Id}',
-                    'FirstName' : 'Mark',
-                    'LastName' : 'Morrison'
-                }
-            },
-            {
-                'method' : 'POST',
-                'url' : '/services/data/v39.0/sobjects/Contact',
-                'referenceId' : 'NewChrisContact',
-                'body' : {
-                    'AccountId' : '@{AccountResults.records[0].Id}',
-                    'FirstName' : 'Chris',
-                    'LastName' : 'Kelley'
+                    'FirstName' : 'Doug',
+                    'LastName' : 'Ayers'
                 }
             }
         ]
-    };
-
-    var headerData = {
-        'Authorization' : 'Bearer ' + oauth.access_token
-    };
-
-    request.post( { url: url, json: true, body: data, headers: headerData }, function( err, httpResponse, body ) {
-
-        console.log( JSON.stringify( body, null, 2 ) );
-
-        //res.send( body );
+    }, function( error, response ) {
 
         res.render( 'api_response', {
-            'title' : 'Tour of Salesforce REST APIs for Multiple DML in Single Request',
-            'app.name' : 'Midwest Dreamin 2017',
+            'title' : webPageTitle,
+            'app.name' : webAppName,
             'tabComposite2Selected' : true,
-            'jsonResponse' : JSON.stringify( body, null, 2 )
+            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
     });
@@ -244,9 +218,9 @@ app.get( '/api/composite2', function ( req, res ) {
  */
 app.get( '/api/tree', function ( req, res ) {
 
-    var url = oauth.instance_url + '/services/data/v39.0/composite/tree/Account'; // root records are accounts
+    var path = '/services/data/v39.0';
 
-    var data = {
+    conn.requestPost( path + '/composite/tree/Account', {
         'records' : [
             {
                 'attributes' : {
@@ -298,27 +272,15 @@ app.get( '/api/tree', function ( req, res ) {
                 } // end opportunities
             } // end account
         ] // end tree
-    };
-
-    var headerData = {
-        'Authorization' : 'Bearer ' + oauth.access_token
-    };
-
-    request.post( { url: url, json: true, body: data, headers: headerData }, function( err, httpResponse, body ) {
-
-        console.log( JSON.stringify( body, null, 2 ) );
-
-        //res.send( body );
+    }, function( error, response ) {
 
         res.render( 'api_response', {
-            'title' : 'Tour of Salesforce REST APIs for Multiple DML in Single Request',
-            'app.name' : 'Midwest Dreamin 2017',
+            'title' : webPageTitle,
+            'app.name' : webAppName,
             'tabTreeSelected' : true,
-            'jsonResponse' : JSON.stringify( body, null, 2 )
+            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
     });
 
 });
-
-app.listen( process.env.PORT || 80 );

@@ -14,10 +14,10 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^4.0.0",
-    "express": "^4.15.2",
+    "express": "^4.15.3",
     "express-handlebars": "^3.0.0",
-    "nforce": "^1.7.0",
-    "request": "^2.80.0"
+    "jsforce": "^1.8.0",
+    "request": "^2.81.0"
   },
   "keywords": [
     "saleforce",

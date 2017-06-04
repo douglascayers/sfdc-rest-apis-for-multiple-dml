@@ -2,88 +2,57 @@
  * Example Apex REST web service for creating multiple objects via API.
  *
  * Developed by Doug Ayers (douglascayers.com)
- * https://github.com/DouglasCAyers/nashville-sfdc-apex-rest
+ * https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml
  */
 @RestResource( urlMapping = '/v1/service/*')
 global class MyApexRestService {
 
     /**
-     * Creates one or more accounts and contacts in a single transaction.
+     * Creates an account and contact in a single transaction with one API request.
      * If all successful then a response per account/contact created is returned.
      * If any error then one response returned with error message.
      */
     @HttpPost
-    global static List<Response> saveData( List<Request> requests ) {
+    global static Response saveData( Request request ) {
 
-        System.debug( 'saving data' );
-        System.debug( requests );
+        Response response = new Response();
 
-        SavePoint sp = Database.setSavepoint();
-
-        List<Response> responses = new List<Response>();
+        SavePoint sp = Database.setSavePoint();
 
         try {
 
-            List<Account> newAccounts = new List<Account>();
-            List<Contact> newContacts = new List<Contact>();
+            Account acct = new Account(
+                name = request.company,
+                billingStreet = request.street,
+                billingCity = request.city,
+                billingState = request.state
+            );
 
-            for ( Integer i = 0; i < requests.size(); i++ ) {
+            insert acct;
 
-                newAccounts.add( new Account(
-                    name = requests[i].company,
-                    billingStreet = requests[i].street,
-                    billingCity = requests[i].city,
-                    billingState = requests[i].state
-                ));
+            Contact cont = new Contact(
+                accountId = acct.id,
+                firstName = request.firstName,
+                lastName = request.lastName
+            );
 
-            }
+            insert cont;
 
-            insert newAccounts;
-
-            for ( Integer i = 0; i < requests.size(); i++ ) {
-
-                newContacts.add( new Contact(
-                    accountId = newAccounts[i].id,
-                    firstName = requests[i].firstName,
-                    lastName = requests[i].lastName,
-                    mailingStreet = requests[i].street,
-                    mailingCity = requests[i].city,
-                    mailingState = requests[i].state
-                ));
-
-            }
-
-            insert newContacts;
-
-            for ( Integer i = 0; i < requests.size(); i++ ) {
-
-                Response res = new Response();
-
-                res.success = true;
-                res.accountId = newAccounts[i].id;
-                res.contactId = newContacts[i].id;
-
-                responses.add( res );
-
-            }
+            response.success = true;
+            response.accountId = acct.id;
+            response.contactId = cont.id;
 
         } catch ( Exception e ) {
 
             Database.rollback( sp );
 
-            System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
-
-            Response res = new Response();
-
-            res.success = false;
-            res.message = e.getMessage();
-            res.detailMessage = e.getStackTraceString();
-
-            responses = new List<Response>{ res };
+            response.success = false;
+            response.message = e.getMessage();
+            response.detailMessage = e.getStackTraceString();
 
         }
 
-        return responses;
+        return response;
     }
 
     global class Request {

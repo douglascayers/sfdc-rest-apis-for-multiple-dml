@@ -22,6 +22,10 @@
               white-space: -o-pre-wrap;    /* Opera 7 */
               word-wrap: break-word;       /* Internet Explorer 5.5+ */
           }
+
+          .slds-form-element__label {
+            font-weight: bold;
+          }
         </style>
     </head>
 
@@ -33,7 +37,9 @@
               <div class="slds-global-header slds-grid slds-grid_align-spread">
                 <div class="slds-global-header__item">
                   <div class="slds-global-header__logo">
-                    <img src="/assets/images/logo-noname.svg" alt="">
+                    <a href="http://midwestdreamin.com" target="_blank">
+                      <img src="/images/midwest-dreamin-logo.png" alt="Midwest Dreamin"/>
+                    </a>
                   </div>
                 </div>
                 <div class="slds-global-header__item slds-global-header__item_search">
@@ -89,10 +95,10 @@
                     </button>
                   </li>
                   <li class="slds-dropdown-trigger slds-dropdown-trigger_click slds-m-left_x-small">
-                    <button class="slds-button" title="person name" aria-haspopup="true">
+                    <button class="slds-button" title="Doug Ayers" aria-haspopup="true">
                       <span class="slds-avatar slds-avatar_circle slds-avatar_medium">
-                        <a href="https://douglascayers.com">
-                          <img alt="Person name" src="/images/DougAyers-MVP.png" title="User avatar">
+                        <a href="https://douglascayers.com" target="_blank">
+                          <img alt="Person name" src="/images/DougAyers.jpg" title="Doug Ayers">
                         </a>
                       </span>
                     </button>
@@ -135,8 +141,8 @@
                       <span class="slds-truncate" title="Home">Home</span>
                     </a>
                   </li>
-                  <li class="slds-context-bar__item {{#if tabCustomSelected}}slds-is-active{{/if}}">
-                    <a href="/api/custom" class="slds-context-bar__label-action" title="Custom Apex">
+                  <li class="slds-context-bar__item {{#if tabApexSelected}}slds-is-active{{/if}}">
+                    <a href="/api/apex" class="slds-context-bar__label-action" title="Custom Apex">
                       <span class="slds-truncate" title="Custom Apex">Custom Apex</span>
                     </a>
                   </li>
