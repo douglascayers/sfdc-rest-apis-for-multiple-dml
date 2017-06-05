@@ -28,8 +28,11 @@ Getting Started
 3. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
 
   (a) Provide **Connected App Name**
+
   (b) Provide **Contact Email**
+
   (c) Select **Enable OAuth Settings**
+
   (d) Select **OAuth Scopes** (id, api, web)
 
 ![screen shot](images/connected-app1.png)
