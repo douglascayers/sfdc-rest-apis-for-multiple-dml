@@ -24,17 +24,18 @@ Getting Started
 ---------------
 
 1. Install [Heroku Toolbelt](https://devcenter.heroku.com/articles/heroku-cli)
-2. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
+2. Install [NodeJS](https://nodejs.org). I used v8.0 on Windows (x64)
+3. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
 
+TODO instructions for giving name, scope, enable oauth
 TODO insert image
 
-3. Clone this project
+4. Clone this project
 ```
 git clone https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml.git
 cd sfdc-rest-apis-for-multiple-dml
 ```
-4. Create or deploy the apex class `/src/classes/MyApexRestService.cls` in your org
-5. In the project folder, create file named `.env` that includes the following properties:
+5. In the project folder, create a file named `.env` that includes the following properties:
 ```
 SFDC_CLIENT_KEY=your connected app key
 SFDC_CLIENT_SECRET=your connected app secret
@@ -42,5 +43,26 @@ SFDC_PASSWORD=your salesforce password
 SFDC_TOKEN=your salesforce token
 SFDC_USERNAME=your salesforce username
 ```
-6. Run the app locally via `heroku local`
-7. In your browser go to http://localhost:5000/
+6. Create the apex class `/src/classes/MyApexRestService.cls` in your Salesforce developer org
+7. Run the app locally from command line via `heroku local`
+8. In your browser go to http://localhost:5000/
+
+
+Usage
+-----
+
+The web app has tabs that demonstrate API behavior. Here is description and purpose of each:
+
+TODO insert image of menu tabs
+
+**Home** : Display speaker information
+
+**Traditional** : Making multiple API requests to create records. If the 2nd request were to fail there is no clean way to rollback the 1st request.
+
+**Custom Apex** : Overcomes multiple API requests by exposing a custom endpoint. The transaction and rollback logic are in the apex class.
+
+**Composite** : No need for custom apex code, also overcomes multiple API requests by using Composite API that bundles the requests together in an "all or none" fashion.
+
+**Composite 2** : Another example of using Composite API, this time querying for existing data and piping that into the new records to be created.
+
+**SObject Tree** : Specialized variant of the Composite API for creating a record and related list records in a single API call and transaction.
