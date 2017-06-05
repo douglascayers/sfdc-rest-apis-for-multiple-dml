@@ -27,8 +27,14 @@ Getting Started
 2. Install [NodeJS](https://nodejs.org). I used v8.0 on Windows (x64)
 3. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
 
-TODO instructions for giving name, scope, enable oauth
-TODO insert image
+  (a) Provide **Connected App Name**
+  (b) Provide **Contact Email**
+  (c) Select **Enable OAuth Settings**
+  (d) Select **OAuth Scopes** (id, api, web)
+
+![screen shot](images/connected-app1.png)
+
+![screen shot](images/connected-app2.png)
 
 4. Clone this project
 ```
@@ -37,8 +43,8 @@ cd sfdc-rest-apis-for-multiple-dml
 ```
 5. In the project folder, create a file named `.env` that includes the following properties:
 ```
-SFDC_CLIENT_KEY=your connected app key
-SFDC_CLIENT_SECRET=your connected app secret
+SFDC_CLIENT_KEY=your connected app consumer key
+SFDC_CLIENT_SECRET=your connected app consumer secret
 SFDC_PASSWORD=your salesforce password
 SFDC_TOKEN=your salesforce token
 SFDC_USERNAME=your salesforce username
@@ -53,7 +59,7 @@ Usage
 
 The web app has tabs that demonstrate API behavior. Here is description and purpose of each:
 
-TODO insert image of menu tabs
+![screen shot](images/web-page-tabs.png)
 
 **Home** : Display speaker information
 
