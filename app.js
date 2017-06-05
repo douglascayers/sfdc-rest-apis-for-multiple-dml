@@ -60,6 +60,71 @@ app.get( '/', function( req, res ) {
 
 
 /*
+    Traditional Approach
+
+    https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm
+
+    Executes multiple API calls to create data.
+    First creates account then if successful creates more related records.
+    Each request counts towards your API call limit, and runs in its own separate transaction.
+    An error on the 2nd or 3rd request cannot easily "rollback" or "undo" earlier changes.
+    Any side effects like email alerts and triggers will have already fired and happened.
+ */
+app.get( '/api/traditional', function( req, res ) {
+
+    var sendBrowserResponse = function( jsonObj ) {
+        res.render( 'api_response', {
+            'title' : webPageTitle,
+            'app.name' : webAppName,
+            'tabTraditionalSelected' : true,
+            'jsonResponse' : JSON.stringify( jsonObj, null, 2 )
+        });
+    };
+
+    // try to create account
+    conn.sobject( 'Account' ).create({          // <instance>/services/data/39.0/sobjects/Account
+        'Name' : 'Midwest Dreamin',
+        'BillingStreet' : '17 E Monroe St',
+        'BillingCity' : 'Chicago',
+        'BillingState' : 'Illinois'
+    }, function( error, accountResponse ) {
+
+        if ( error ) {
+
+            // failed to create account,
+            // not continuing to try and create contact
+            sendBrowserResponse({
+                'account' : ( error || accountResponse ),
+                'contact' : null
+            });
+
+        } else {
+
+            // created account, now try to create contact
+            conn.sobject( 'Contact' ).create({  // <instance>/services/data/39.0/sobjects/Contact
+                'AccountId' : accountResponse.id,
+                'FirstName' : 'Eric',
+                'LastName' : 'Dreshfield'
+            }, function( error, contactResponse ) {
+
+                // if we failed to create contact then what?
+                // no way to rollback... delete account? what if that api call fails?
+                // maybe chaining DML operations across multiple transactions and API requests isn't good...
+                sendBrowserResponse({
+                    'account' : accountResponse,
+                    'contact' : ( error || contactResponse )
+                });
+
+            });
+
+        }
+
+    });
+
+});
+
+
+/*
     Custom Apex REST API
 
     https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST
@@ -69,10 +134,11 @@ app.get( '/', function( req, res ) {
     Executes a single API request to a custom Apex REST service.
     The apex class creates a new Account and Contact based on the arguments.
     If any error then the method rollsback the entire transaction for an "all or none" result.
+    No side effects from email alerts or triggers will have fired if any error.
  */
 app.get( '/api/apex', function ( req, res ) {
 
-    conn.apex.post( '/v1/service/', {
+    conn.apex.post( '/MyApexRestService', { // <instance>/services/apexrest/MyApexRestService
         'request' : {
 
             'firstName' : 'Marc',           // contact.firstName
@@ -107,17 +173,18 @@ app.get( '/api/apex', function ( req, res ) {
     You can use the output of one request as the input to a subsequent request.
     The response bodies and HTTP statuses of the requests are returned in a single response body.
     The entire request counts as a single call toward your API limits.
+    No side effects from email alerts or triggers will have fired if any error.
  */
 app.get( '/api/composite', function ( req, res ) {
 
     var path = '/services/data/v39.0';
 
-    conn.requestPost( path + '/composite', {
+    conn.requestPost( path + '/composite', {            // <instance>/services/data/v39.0/composite
         'allOrNone' : true,
         'compositeRequest' : [
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Account',
+                'url' : path + '/sobjects/Account',     // <instance>/services/data/v39.0/sobjects/Account
                 'referenceId' : 'GearsAccount',
                 'body' : {
                     'Name' : 'GearsCRM',
@@ -128,7 +195,7 @@ app.get( '/api/composite', function ( req, res ) {
             },
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Contact',
+                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v39.0/sobjects/Contact
                 'referenceId' : 'GearsContact',
                 'body' : {
                     'AccountId' : '@{GearsAccount.id}',
@@ -160,22 +227,23 @@ app.get( '/api/composite', function ( req, res ) {
     First request queries for existing account then
     subsequent request creates a new contact at that account.
     Again, the entire request counts as a single call toward your API limits.
+    No side effects from email alerts or triggers will have fired if any error.
  */
 app.get( '/api/composite2', function ( req, res ) {
 
     var path = '/services/data/v39.0';
 
-    conn.requestPost( path + '/composite', {
+    conn.requestPost( path + '/composite', {            // <instance>/services/data/v39.0/composite
         'allOrNone' : true,
         'compositeRequest' : [
             {
-                'method' : 'GET',
+                'method' : 'GET',                       // <instance>/services/data/v39.0/query
                 'url' : path + '/query/?q=' + "SELECT id FROM Account WHERE name = 'GearsCRM' ORDER BY CreatedDate DESC LIMIT 1".replace(/( )+/g, '+' ),
                 'referenceId' : 'AccountResults'
             },
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Contact',
+                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v39.0/sobjects/Contact
                 'referenceId' : 'NewContact',
                 'body' : {
                     'AccountId' : '@{AccountResults.records[0].Id}',
@@ -207,6 +275,7 @@ app.get( '/api/composite2', function ( req, res ) {
     Creates one or more sObject trees with root records of the specified type.
     An sObject tree is a collection of nested, parent-child records with a single root record.
     That is, you create the parent record (e.g. Account) and then its related lists (e.g. Contacts, Opportunities, Cases).
+    It is a specialized variant of the Composite API.
 
     The request can contain the following:
         * Up to a total of 200 records across all trees
@@ -217,12 +286,12 @@ app.get( '/api/tree', function ( req, res ) {
 
     var path = '/services/data/v39.0';
 
-    conn.requestPost( path + '/composite/tree/Account', {
+    conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v39.0/composite/tree/Account
         'records' : [
             {
                 'attributes' : {
                     'type' : 'Account',
-                    'referenceId' : 'DisneyAccount' // how to cross-ref generated id in response
+                    'referenceId' : 'DisneyAccount'
                 },
                 // account fields
                 'Name' : 'Walt Disney World Resort',

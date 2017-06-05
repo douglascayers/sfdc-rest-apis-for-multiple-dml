@@ -4,7 +4,7 @@
  * Developed by Doug Ayers (douglascayers.com)
  * https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml
  */
-@RestResource( urlMapping = '/v1/service/*')
+@RestResource( urlMapping = '/MyApexRestService')
 global class MyApexRestService {
 
     /**
