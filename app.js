@@ -19,10 +19,7 @@ var conn = new jsforce.Connection({
 });
 
 conn.login( process.env.SFDC_USERNAME, process.env.SFDC_PASSWORD + process.env.SFDC_TOKEN, function( err, res ) {
-    if ( err ) {
-        console.error( err );
-        process.exit(1);
-    }
+    if ( err ) { throw err; }
     console.log( res );
 });
 
