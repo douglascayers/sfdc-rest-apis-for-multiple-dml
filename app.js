@@ -2,10 +2,10 @@
 // Load libraries
 // ==============================================
 
-var dotenv = require('dotenv').config(); // necessary if running via 'node app.js' instead of 'heroku local'
+var dotenv  = require('dotenv').config(); // necessary if running via 'node app.js' instead of 'heroku local'
 var jsforce = require('jsforce'); // fabulous library for accessing salesforce! https://jsforce.github.io
 var express = require('express'); // turn our nodejs app into a web server
-var exphbs = require('express-handlebars'); // for html templating responses
+var exphbs  = require('express-handlebars'); // for html templating responses
 
 // ==============================================
 // Configure variables
