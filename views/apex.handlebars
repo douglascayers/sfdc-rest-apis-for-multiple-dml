@@ -1,0 +1,191 @@
+<div class="slds-m-left_large slds-m-right_large">
+
+    <div class="slds-grid slds-p-vertical_small">
+
+        <div class="slds-form-element__control">
+            <div class="slds-radio_button-group">
+                <span class="slds-button slds-radio_button">
+                    <input type="radio" name="radio" id="apexBtn" checked="checked">
+                    <label class="slds-radio_button__label" for="apexBtn">
+                        <span class="slds-radio_faux">Apex</span>
+                    </label>
+                </span>
+                <span class="slds-button slds-radio_button">
+                    <input type="radio" name="radio" id="requestBtn">
+                    <label class="slds-radio_button__label" for="requestBtn">
+                        <span class="slds-radio_faux">Request</span>
+                    </label>
+                </span>
+                <span class="slds-button slds-radio_button">
+                    <input type="radio" name="radio" id="responseBtn">
+                    <label class="slds-radio_button__label" for="responseBtn">
+                        <span class="slds-radio_faux">Response</span>
+                    </label>
+                </span>
+            </div>
+        </div>
+
+        <script>
+            $(function() {
+
+                $('#apexBtn').change( function() {
+                    if ( $(this).is(':checked') ) {
+                        $('#apex').removeClass('slds-hide');
+                        $('#request,#response').addClass('slds-hide');
+                    }
+                });
+
+                $('#requestBtn').change( function() {
+                    if ( $(this).is(':checked') ) {
+                        $('#request').removeClass('slds-hide');
+                        $('#apex,#response').addClass('slds-hide');
+                    }
+                });
+
+                $('#responseBtn').change( function() {
+                    if ( $(this).is(':checked') ) {
+                        $('#response').removeClass('slds-hide');
+                        $('#apex,#request').addClass('slds-hide');
+                    }
+                });
+
+            });
+        </script>
+
+    </div>
+
+    <div id="apex" class="slds-grid">
+
+        <div class="slds-col">
+            <pre><code class="java slds-box">
+@RestResource( urlMapping = '/MyApexRestService')
+global class MyApexRestService {
+
+    @HttpPost
+    global static Response saveData( Request request ) {
+
+        Response response = new Response();
+
+        SavePoint sp = Database.setSavePoint();
+
+        try {
+
+            Account acct = new Account(
+                name = request.company,
+                billingStreet = request.street,
+                billingCity = request.city,
+                billingState = request.state
+            );
+
+            insert acct;
+
+            Contact cont = new Contact(
+                accountId = acct.id,
+                firstName = request.firstName,
+                lastName = request.lastName
+            );
+
+            insert cont;
+
+            response.success = true;
+            response.accountId = acct.id;
+            response.contactId = cont.id;
+
+        } catch ( Exception e ) {
+
+            Database.rollback( sp );
+
+            response.success = false;
+            response.message = e.getMessage();
+            response.detailMessage = e.getStackTraceString();
+
+        }
+
+        return response;
+    }
+
+    global class Request {
+
+        global String firstName;
+        global String lastName;
+        global String company;
+        global String street;
+        global String city;
+        global String state;
+
+    }
+
+    global class Response {
+
+        global Boolean success;
+        global String message;
+        global String detailMessage;
+
+        global ID accountId;
+        global ID contactId;
+
+    }
+
+}
+            </code></pre>
+        </div>
+
+    </div>
+
+    <div id="request" class="slds-grid slds-hide">
+
+        <div class="slds-col">
+            <pre><code class="js slds-box">
+var conn = new jsforce.Connection({ ... });
+
+// POST &lt;instance&gt;/services/apexrest/MyApexRestService
+conn.apex.post( '/MyApexRestService', {
+    'request' : {
+
+        'firstName' : 'Marc',               // contact.firstName
+        'lastName'  : 'Benioff',            // contact.lastName
+
+        'company'   : 'Salesforce',         // account.name
+        'street'    : '1 Market Street',    // account.billingStreet
+        'city'      : 'San Francisco',      // account.billingCity
+        'state'     : 'California'          // account.billingState
+
+    }
+}, function( error, response ) {
+    if ( error ) {
+        // handle error: no account or contact created
+        // all DML rolled back together
+    } else {
+        // account + contact have been created!
+    }
+});
+            </code></pre>
+        </div>
+
+    </div>
+
+    <div id="response" class="slds-grid slds-hide">
+
+        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
+            <div class="slds-text-heading_medium">Happy Path</div>
+            <pre><code class="js slds-box">
+{{jsonResponse}}
+            </code></pre>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+            <div class="slds-text-heading_medium">Unhappy Path</div>
+            <pre><code class="js slds-box">
+{
+  "success": false,
+  "message": "Insert failed. First exception on row 0; first error: REQUIRED_FIELD_MISSING, Required fields are missing: [LastName]: [LastName]",
+  "detailMessage": "Class.MyApexRestService.saveData: line 39, column 1",
+  "contactId": null,
+  "accountId": null
+}
+            </code></pre>
+        </div>
+
+    </div>
+
+</div>

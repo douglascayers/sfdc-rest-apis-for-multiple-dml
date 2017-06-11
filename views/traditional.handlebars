@@ -1,50 +1,12 @@
 <div class="slds-m-left_large slds-m-right_large">
 
-    <div class="slds-grid slds-p-vertical_small">
-
-        <div class="slds-form-element__control">
-            <div class="slds-radio_button-group">
-                <span class="slds-button slds-radio_button">
-                    <input type="radio" name="radio" id="requestBtn" checked="checked">
-                    <label class="slds-radio_button__label" for="requestBtn">
-                        <span class="slds-radio_faux">Request</span>
-                    </label>
-                </span>
-                <span class="slds-button slds-radio_button">
-                    <input type="radio" name="radio" id="responseBtn">
-                    <label class="slds-radio_button__label" for="responseBtn">
-                        <span class="slds-radio_faux">Response</span>
-                    </label>
-                </span>
-            </div>
-        </div>
-
-        <script>
-            $(function() {
-
-                $('#requestBtn').change( function() {
-                    if ( $(this).is(':checked') ) {
-                        $('#request').removeClass('slds-hide');
-                        $('#response').addClass('slds-hide');
-                    }
-                });
-
-                $('#responseBtn').change( function() {
-                    if ( $(this).is(':checked') ) {
-                        $('#response').removeClass('slds-hide');
-                        $('#request').addClass('slds-hide');
-                    }
-                });
-
-            });
-        </script>
-
-    </div>
+    <!-- load '/views/partials/requestResponseBtn.handlebars' -->
+    {{> requestResponseBtn}}
 
     <div id="request" class="slds-grid">
 
         <div class="slds-col">
-            <pre><code class="js">// var conn = new jsforce.Connection({ ... });
+            <pre><code class="js slds-box">var conn = new jsforce.Connection({ ... });
 
 // try to create account...
 // POST &lt;instance&gt;/services/data/39.0/sobjects/Account
@@ -78,11 +40,11 @@ conn.sobject( 'Account' ).create({
 
     </div>
 
-    <div id="response" class="slds-grid slds-hide" style="background-color:#F0F0F0;">
+    <div id="response" class="slds-grid slds-hide">
 
-        <div class="slds-col slds-size_1-of-2">
-            <div class="slds-text-heading_medium" style="background-color:#FFF;">Happy Path</div>
-            <pre><code class="js" style="height: inherit">
+        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
+            <div class="slds-text-heading_medium">Happy Path</div>
+            <pre><code class="js slds-box">
 // account
 {{accountJsonResponse}}
 
@@ -91,9 +53,9 @@ conn.sobject( 'Account' ).create({
             </code></pre>
         </div>
 
-        <div class="slds-col slds-size_1-of-2">
-            <div class="slds-text-heading_medium" style="background-color:#FFF;">Unhappy Path</div>
-            <pre><code class="js">
+        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+            <div class="slds-text-heading_medium">Unhappy Path</div>
+            <pre><code class="js slds-box">
 // account
 {
   "id": "0011a00000hAHdEAAW",

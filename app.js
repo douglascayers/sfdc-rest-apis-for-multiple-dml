@@ -146,7 +146,7 @@ app.get( '/api/apex', function ( req, res ) {
         }
     }, function( error, response ) {
 
-        res.render( 'api_response', {
+        res.render( 'apex', {
             'title' : webPageTitle,
             'app.name' : webAppName,
             'tabApexSelected' : true,
@@ -171,14 +171,14 @@ app.get( '/api/apex', function ( req, res ) {
  */
 app.get( '/api/composite1', function ( req, res ) {
 
-    var path = '/services/data/v39.0';
+    var path = '/services/data/v40.0';
 
-    conn.requestPost( path + '/composite', {            // <instance>/services/data/v39.0/composite
+    conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
         'allOrNone' : true,
         'compositeRequest' : [
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Account',     // <instance>/services/data/v39.0/sobjects/Account
+                'url' : path + '/sobjects/Account',     // <instance>/services/data/v40.0/sobjects/Account
                 'referenceId' : 'GearsAccount',
                 'body' : {
                     'Name' : 'GearsCRM',
@@ -189,7 +189,7 @@ app.get( '/api/composite1', function ( req, res ) {
             },
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v39.0/sobjects/Contact
+                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v40.0/sobjects/Contact
                 'referenceId' : 'GearsContact',
                 'body' : {
                     'AccountId' : '@{GearsAccount.id}',
@@ -200,7 +200,7 @@ app.get( '/api/composite1', function ( req, res ) {
         ]
     }, function( error, response ) {
 
-        res.render( 'api_response', {
+        res.render( 'composite1', {
             'title' : webPageTitle,
             'app.name' : webAppName,
             'tabComposite1Selected' : true,
@@ -224,19 +224,22 @@ app.get( '/api/composite1', function ( req, res ) {
  */
 app.get( '/api/composite2', function ( req, res ) {
 
-    var path = '/services/data/v39.0';
+    var path = '/services/data/v40.0';
 
-    conn.requestPost( path + '/composite', {            // <instance>/services/data/v39.0/composite
+    conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
         'allOrNone' : true,
         'compositeRequest' : [
             {
-                'method' : 'GET',                       // <instance>/services/data/v39.0/query
-                'url' : path + '/query/?q=' + "SELECT id FROM Account WHERE name = 'GearsCRM' ORDER BY CreatedDate DESC LIMIT 1".replace(/( )+/g, '+' ),
+                'method' : 'GET',                       // <instance>/services/data/v40.0/query
+                'url' : path + '/query/?q=' +
+                    // encode url for "application/x-www-form-urlencoded" parameters by further replacing '%20' (space) with '+'
+                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
+                    encodeURIComponent("SELECT id FROM Account WHERE name = 'GearsCRM' ORDER BY CreatedDate DESC LIMIT 1").replace(/%20/g, '+' ),
                 'referenceId' : 'AccountResults'
             },
             {
                 'method' : 'POST',
-                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v39.0/sobjects/Contact
+                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v40.0/sobjects/Contact
                 'referenceId' : 'NewContact',
                 'body' : {
                     'AccountId' : '@{AccountResults.records[0].Id}',
@@ -247,7 +250,7 @@ app.get( '/api/composite2', function ( req, res ) {
         ]
     }, function( error, response ) {
 
-        res.render( 'api_response', {
+        res.render( 'composite2', {
             'title' : webPageTitle,
             'app.name' : webAppName,
             'tabComposite2Selected' : true,
@@ -276,9 +279,9 @@ app.get( '/api/composite2', function ( req, res ) {
  */
 app.get( '/api/tree', function ( req, res ) {
 
-    var path = '/services/data/v39.0';
+    var path = '/services/data/v40.0';
 
-    conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v39.0/composite/tree/Account
+    conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v40.0/composite/tree/Account
         'records' : [
             {
                 'attributes' : {

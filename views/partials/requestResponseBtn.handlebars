@@ -1,0 +1,40 @@
+<div class="slds-grid slds-p-vertical_small">
+
+    <div class="slds-form-element__control">
+        <div class="slds-radio_button-group">
+            <span class="slds-button slds-radio_button">
+                <input type="radio" name="radio" id="requestBtn" checked="checked">
+                <label class="slds-radio_button__label" for="requestBtn">
+                    <span class="slds-radio_faux">Request</span>
+                </label>
+            </span>
+            <span class="slds-button slds-radio_button">
+                <input type="radio" name="radio" id="responseBtn">
+                <label class="slds-radio_button__label" for="responseBtn">
+                    <span class="slds-radio_faux">Response</span>
+                </label>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+
+            $('#requestBtn').change( function() {
+                if ( $(this).is(':checked') ) {
+                    $('#request').removeClass('slds-hide');
+                    $('#response').addClass('slds-hide');
+                }
+            });
+
+            $('#responseBtn').change( function() {
+                if ( $(this).is(':checked') ) {
+                    $('#response').removeClass('slds-hide');
+                    $('#request').addClass('slds-hide');
+                }
+            });
+
+        });
+    </script>
+
+</div>
