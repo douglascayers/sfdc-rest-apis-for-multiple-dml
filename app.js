@@ -2,10 +2,10 @@
 // Load libraries
 // ==============================================
 
-var dotenv  = require('dotenv').config(); // necessary if running via 'node app.js' instead of 'heroku local'
-var jsforce = require('jsforce'); // fabulous library for accessing salesforce! https://jsforce.github.io
-var express = require('express'); // turn our nodejs app into a web server
-var exphbs  = require('express-handlebars'); // for html templating responses
+var dotenv  = require('dotenv').config();       // necessary if running via 'node app.js' instead of 'heroku local'
+var jsforce = require('jsforce');               // fabulous library for accessing salesforce! https://jsforce.github.io
+var express = require('express');               // turn our nodejs app into a web server
+var exphbs  = require('express-handlebars');    // for html templating responses
 
 // ==============================================
 // Configure variables
@@ -26,7 +26,6 @@ conn.login( process.env.SFDC_USERNAME, process.env.SFDC_PASSWORD + process.env.S
 var webPageTitle = 'Tour of Salesforce REST APIs for Multiple DML in Single Request';
 var webAppName = 'Midwest Dreamin 2017';
 
-
 // ==============================================
 // Configure web app to respond to requests
 // ==============================================
@@ -35,13 +34,12 @@ var app = express();
 
 app.set( 'json spaces', 4 ); // pretty print json
 
-app.listen( process.env.PORT || 80 );
+app.listen( process.env.PORT || 8080 );
 
 app.use( express.static( __dirname + '/public' ) );
 
 app.engine( 'handlebars', exphbs( { defaultLayout: 'main' } ) );
 app.set( 'view engine', 'handlebars' );
-
 
 // ==============================================
 // Configure web app endpoints
@@ -58,7 +56,6 @@ app.get( '/', function( req, res ) {
     });
 });
 
-
 /*
     Traditional Approach
 
@@ -72,30 +69,25 @@ app.get( '/', function( req, res ) {
  */
 app.get( '/api/traditional', function( req, res ) {
 
-    var sendBrowserResponse = function( jsonObj ) {
-        res.render( 'api_response', {
-            'title' : webPageTitle,
-            'app.name' : webAppName,
-            'tabTraditionalSelected' : true,
-            'jsonResponse' : JSON.stringify( jsonObj, null, 2 )
-        });
-    };
-
     // try to create account
     conn.sobject( 'Account' ).create({          // <instance>/services/data/39.0/sobjects/Account
         'Name' : 'Midwest Dreamin',
         'BillingStreet' : '17 E Monroe St',
         'BillingCity' : 'Chicago',
-        'BillingState' : 'Illinois'
+        'BillingState' : 'Illinois',
+        'BillingPostalCode' : '60603'
     }, function( error, accountResponse ) {
 
         if ( error ) {
 
             // failed to create account,
             // not continuing to try and create contact
-            sendBrowserResponse({
-                'account' : ( error || accountResponse ),
-                'contact' : null
+            res.render( 'traditional', {
+                'title' : webPageTitle,
+                'app.name' : webAppName,
+                'tabTraditionalSelected' : true,
+                'accountJsonResponse' : JSON.stringify( error || accountResponse, null, 2 ),
+                'contactJsonResponse' : null
             });
 
         } else {
@@ -110,9 +102,12 @@ app.get( '/api/traditional', function( req, res ) {
                 // if we failed to create contact then what?
                 // no way to rollback... delete account? what if that api call fails?
                 // maybe chaining DML operations across multiple transactions and API requests isn't good...
-                sendBrowserResponse({
-                    'account' : accountResponse,
-                    'contact' : ( error || contactResponse )
+                res.render( 'traditional', {
+                    'title' : webPageTitle,
+                    'app.name' : webAppName,
+                    'tabTraditionalSelected' : true,
+                    'accountJsonResponse' : JSON.stringify( accountResponse, null, 2 ),
+                    'contactJsonResponse' : JSON.stringify( error || contactResponse, null, 2 )
                 });
 
             });
@@ -122,7 +117,6 @@ app.get( '/api/traditional', function( req, res ) {
     });
 
 });
-
 
 /*
     Custom Apex REST API
@@ -175,7 +169,7 @@ app.get( '/api/apex', function ( req, res ) {
     The entire request counts as a single call toward your API limits.
     No side effects from email alerts or triggers will have fired if any error.
  */
-app.get( '/api/composite', function ( req, res ) {
+app.get( '/api/composite1', function ( req, res ) {
 
     var path = '/services/data/v39.0';
 
@@ -209,14 +203,13 @@ app.get( '/api/composite', function ( req, res ) {
         res.render( 'api_response', {
             'title' : webPageTitle,
             'app.name' : webAppName,
-            'tabCompositeSelected' : true,
+            'tabComposite1Selected' : true,
             'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
     });
 
 });
-
 
 /*
     Composite REST API (example 2)
@@ -264,7 +257,6 @@ app.get( '/api/composite2', function ( req, res ) {
     });
 
 });
-
 
 /*
     SObject Tree REST API

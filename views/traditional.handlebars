@@ -1,0 +1,117 @@
+<div class="slds-m-left_large slds-m-right_large">
+
+    <div class="slds-grid slds-p-vertical_small">
+
+        <div class="slds-form-element__control">
+            <div class="slds-radio_button-group">
+                <span class="slds-button slds-radio_button">
+                    <input type="radio" name="radio" id="requestBtn" checked="checked">
+                    <label class="slds-radio_button__label" for="requestBtn">
+                        <span class="slds-radio_faux">Request</span>
+                    </label>
+                </span>
+                <span class="slds-button slds-radio_button">
+                    <input type="radio" name="radio" id="responseBtn">
+                    <label class="slds-radio_button__label" for="responseBtn">
+                        <span class="slds-radio_faux">Response</span>
+                    </label>
+                </span>
+            </div>
+        </div>
+
+        <script>
+            $(function() {
+
+                $('#requestBtn').change( function() {
+                    if ( $(this).is(':checked') ) {
+                        $('#request').removeClass('slds-hide');
+                        $('#response').addClass('slds-hide');
+                    }
+                });
+
+                $('#responseBtn').change( function() {
+                    if ( $(this).is(':checked') ) {
+                        $('#response').removeClass('slds-hide');
+                        $('#request').addClass('slds-hide');
+                    }
+                });
+
+            });
+        </script>
+
+    </div>
+
+    <div id="request" class="slds-grid">
+
+        <div class="slds-col">
+            <pre><code class="js">// var conn = new jsforce.Connection({ ... });
+
+// try to create account...
+// POST &lt;instance&gt;/services/data/39.0/sobjects/Account
+conn.sobject( 'Account' ).create({
+    'Name'          : 'Midwest Dreamin',
+    'BillingStreet' : '17 E Monroe St',
+    'BillingCity'   : 'Chicago',
+    'BillingState'  : 'Illinois'
+}, function( error, accountResponse ) {
+    if ( error ) { /* handle error */ }
+    else {
+        // created account, now try to create contact...
+        // POST &lt;instance&gt;/services/data/39.0/sobjects/Contact
+        conn.sobject( 'Contact' ).create({
+            'AccountId' : accountResponse.id,
+            'FirstName' : 'Eric',
+            'LastName'  : 'Dreshfield'
+        }, function( error, contactResponse ) {
+            if ( error ) {
+                // handle error... but can't "rollback" account
+                // because that transaction committed
+                // do we delete account or keep moving forward?
+            } else {
+                // account + contact have been created!
+            }
+        });
+    }
+});
+            </code></pre>
+        </div>
+
+    </div>
+
+    <div id="response" class="slds-grid slds-hide" style="background-color:#F0F0F0;">
+
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_medium" style="background-color:#FFF;">Happy Path</div>
+            <pre><code class="js" style="height: inherit">
+// account
+{{accountJsonResponse}}
+
+// contact
+{{contactJsonResponse}}
+            </code></pre>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_medium" style="background-color:#FFF;">Unhappy Path</div>
+            <pre><code class="js">
+// account
+{
+  "id": "0011a00000hAHdEAAW",
+  "success": true,
+  "errors": []
+}
+
+// contact
+{
+  "name": "FIELD_CUSTOM_VALIDATION_EXCEPTION",
+  "errorCode": "FIELD_CUSTOM_VALIDATION_EXCEPTION",
+  "fields": [
+    "MailingPostalCode"
+  ]
+}
+            </code></pre>
+        </div>
+
+    </div>
+
+</div>
