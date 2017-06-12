@@ -23,7 +23,6 @@ By night he can be found blogging about his Salesforce exploits at https://dougl
 Getting Started
 ---------------
 
-1. Install [Heroku Toolbelt](https://devcenter.heroku.com/articles/heroku-cli)
 2. Install [NodeJS](https://nodejs.org). I used v8.0 on Windows (x64)
 3. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
 
@@ -51,10 +50,11 @@ SFDC_CLIENT_SECRET=your connected app consumer secret
 SFDC_PASSWORD=your salesforce password
 SFDC_TOKEN=your salesforce token
 SFDC_USERNAME=your salesforce username
+SFDC_API_VERSION=40.0
 ```
 6. Create the apex class `/src/classes/MyApexRestService.cls` in your Salesforce developer org
-7. Run the app locally from command line via `heroku local`
-8. In your browser go to http://localhost:5000/
+7. Run the app locally from command line via `node app.js`
+8. In your browser go to http://localhost:8080/
 
 
 Usage
@@ -64,14 +64,12 @@ The web app has tabs that demonstrate API behavior. Here is description and purp
 
 ![screen shot](images/web-page-tabs.png)
 
-**Home** : Display speaker information
-
-**Traditional** : Making multiple API requests to create records. If the 2nd request were to fail there is no clean way to rollback the 1st request.
-
-**Custom Apex** : Overcomes multiple API requests by exposing a custom endpoint. The transaction and rollback logic are in the apex class.
-
-**Composite** : No need for custom apex code, also overcomes multiple API requests by using Composite API that bundles the requests together in an "all or none" fashion.
-
-**Composite 2** : Another example of using Composite API, this time querying for existing data and piping that into the new records to be created.
-
-**SObject Tree** : Specialized variant of the Composite API for creating a record and related list records in a single API call and transaction.
+| Tab | Description |
+|---|---|
+| Home | Display speaker and sponsor information |
+| Traditional | Making multiple API requests to create records. If the 2nd request were to fail there is no clean way to rollback the 1st request. |
+| Custom Apex | Overcomes multiple API requests by exposing a custom endpoint. The transaction and rollback logic are in the apex class. |
+| Composite | No need for custom apex code, also overcomes multiple API requests by using Composite API that bundles the requests together in an "all or none" fashion. |
+| SObject Tree | Specialized variant of the Composite API for creating a record and related list records in a single API call and transaction. |
+| Composite 2 | Another example of using Composite API, this time querying for existing data and piping that into the new records to be created. |
+| Composite 3 | Another example that pipes data from previous sub-request into subsequent sub-requests to create account, contact, opportunity, and contact role. |
