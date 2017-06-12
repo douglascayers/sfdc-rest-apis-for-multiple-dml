@@ -53,8 +53,9 @@ SFDC_USERNAME=your salesforce username
 SFDC_API_VERSION=40.0
 ```
 5. Create the apex class `/src/classes/MyApexRestService.cls` in your Salesforce developer org
-6. Run the app locally from command line via `node app.js`
-7. In your browser go to http://localhost:8080/
+6. Install dependencies from command line via `npm install` (this creates a **node_modules** directory)
+7. Run the app locally from command line via `node app.js`
+8. In your browser go to http://localhost:8080/
 
 
 Usage
