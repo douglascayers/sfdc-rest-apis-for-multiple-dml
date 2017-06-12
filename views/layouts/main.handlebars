@@ -13,7 +13,7 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <title>{{title}}</title>
+        <title>Tour of Salesforce REST APIs for Multiple DML in Single Request</title>
 
         <link rel="stylesheet" type="text/css" href="/assets/styles/salesforce-lightning-design-system.css" />
         <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
@@ -53,7 +53,7 @@
                   </div>
                 </div>
                 <div class="slds-global-header__item slds-global-header__item_search">
-                  <span style="color:#0070d2; font-weight:bold;">{{title}}</span>
+                  <span style="color:#0070d2; font-weight:bold;">Tour of Salesforce REST APIs for Multiple DML in Single Request</span>
                 </div>
                 <ul class="slds-global-header__item slds-grid slds-grid_vertical-align-center">
                   <li class="slds-grid">
@@ -125,7 +125,7 @@
               <div class="slds-context-bar__primary slds-context-bar__item_divider-right">
                 <div class="slds-context-bar__item slds-context-bar__dropdown-trigger slds-dropdown-trigger slds-dropdown-trigger_click slds-no-hover">
                   <div class="slds-context-bar__icon-action">
-                    <button class="slds-button slds-icon-waffle_container slds-context-bar__button" title="{{app.name}}">
+                    <button class="slds-button slds-icon-waffle_container slds-context-bar__button" title="Midwest Dreamin 2017">
                       <span class="slds-icon-waffle">
                         <span class="slds-r1"></span>
                         <span class="slds-r2"></span>
@@ -140,7 +140,7 @@
                     </button>
                   </div>
                   <span class="slds-context-bar__label-action slds-context-bar__app-name">
-                    <span class="slds-truncate" title="{{app.name}}">{{app.name}}</span>
+                    <span class="slds-truncate" title="Midwest Dreamin 2017">Midwest Dreamin</span>
                   </span>
                 </div>
               </div>
@@ -166,14 +166,19 @@
                       <span class="slds-truncate" title="Composite">Composite</span>
                     </a>
                   </li>
-                  <li class="slds-context-bar__item {{#if tabComposite2Selected}}slds-is-active{{/if}}">
+                  <li class="slds-context-bar__item {{#if tabTreeSelected}}slds-is-active{{/if}}">
+                    <a href="/api/tree" class="slds-context-bar__label-action" title="SObject Tree">
+                      <span class="slds-truncate" title="SObject Tree">SObject Tree</span>
+                    </a>
+                  </li>
+                  <li class="slds-context-bar__item {{#if tabComposite2Selected}}slds-is-active{{/if}} slds-border_left">
                     <a href="/api/composite2" class="slds-context-bar__label-action" title="Composite 2">
                       <span class="slds-truncate" title="Composite 2">Composite 2</span>
                     </a>
                   </li>
-                  <li class="slds-context-bar__item {{#if tabTreeSelected}}slds-is-active{{/if}}">
-                    <a href="/api/tree" class="slds-context-bar__label-action" title="SObject Tree">
-                      <span class="slds-truncate" title="SObject Tree">SObject Tree</span>
+                  <li class="slds-context-bar__item {{#if tabComposite3Selected}}slds-is-active{{/if}}">
+                    <a href="/api/composite3" class="slds-context-bar__label-action" title="Composite 3">
+                      <span class="slds-truncate" title="Composite 3">Composite 3</span>
                     </a>
                   </li>
                 </ul>

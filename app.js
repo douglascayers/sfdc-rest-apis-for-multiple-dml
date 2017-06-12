@@ -15,16 +15,14 @@ var conn = new jsforce.Connection({
     oauth2 : {
         clientId : process.env.SFDC_CLIENT_KEY,
         clientSecret : process.env.SFDC_CLIENT_SECRET
-    }
+    },
+    version: process.env.SFDC_API_VERSION
 });
 
 conn.login( process.env.SFDC_USERNAME, process.env.SFDC_PASSWORD + process.env.SFDC_TOKEN, function( err, res ) {
     if ( err ) { throw err; }
     console.log( res );
 });
-
-var webPageTitle = 'Tour of Salesforce REST APIs for Multiple DML in Single Request';
-var webAppName = 'Midwest Dreamin 2017';
 
 // ==============================================
 // Configure web app to respond to requests
@@ -50,8 +48,6 @@ app.set( 'view engine', 'handlebars' );
  */
 app.get( '/', function( req, res ) {
     res.render( 'home', {
-        'title' : webPageTitle,
-        'app.name' : webAppName,
         'tabHomeSelected' : true
     });
 });
@@ -70,7 +66,7 @@ app.get( '/', function( req, res ) {
 app.get( '/api/traditional', function( req, res ) {
 
     // try to create account
-    conn.sobject( 'Account' ).create({          // <instance>/services/data/39.0/sobjects/Account
+    conn.sobject( 'Account' ).create({          // <instance>/services/data/v40.0/sobjects/Account
         'Name' : 'Midwest Dreamin',
         'BillingStreet' : '17 E Monroe St',
         'BillingCity' : 'Chicago',
@@ -83,8 +79,6 @@ app.get( '/api/traditional', function( req, res ) {
             // failed to create account,
             // not continuing to try and create contact
             res.render( 'traditional', {
-                'title' : webPageTitle,
-                'app.name' : webAppName,
                 'tabTraditionalSelected' : true,
                 'accountJsonResponse' : JSON.stringify( error || accountResponse, null, 2 ),
                 'contactJsonResponse' : null
@@ -93,7 +87,7 @@ app.get( '/api/traditional', function( req, res ) {
         } else {
 
             // created account, now try to create contact
-            conn.sobject( 'Contact' ).create({  // <instance>/services/data/39.0/sobjects/Contact
+            conn.sobject( 'Contact' ).create({  // <instance>/services/data/v40.0/sobjects/Contact
                 'AccountId' : accountResponse.id,
                 'FirstName' : 'Eric',
                 'LastName' : 'Dreshfield'
@@ -103,8 +97,6 @@ app.get( '/api/traditional', function( req, res ) {
                 // no way to rollback... delete account? what if that api call fails?
                 // maybe chaining DML operations across multiple transactions and API requests isn't good...
                 res.render( 'traditional', {
-                    'title' : webPageTitle,
-                    'app.name' : webAppName,
                     'tabTraditionalSelected' : true,
                     'accountJsonResponse' : JSON.stringify( accountResponse, null, 2 ),
                     'contactJsonResponse' : JSON.stringify( error || contactResponse, null, 2 )
@@ -147,8 +139,6 @@ app.get( '/api/apex', function ( req, res ) {
     }, function( error, response ) {
 
         res.render( 'apex', {
-            'title' : webPageTitle,
-            'app.name' : webAppName,
             'tabApexSelected' : true,
             'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
@@ -171,7 +161,7 @@ app.get( '/api/apex', function ( req, res ) {
  */
 app.get( '/api/composite1', function ( req, res ) {
 
-    var path = '/services/data/v40.0';
+    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
 
     conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
         'allOrNone' : true,
@@ -201,8 +191,6 @@ app.get( '/api/composite1', function ( req, res ) {
     }, function( error, response ) {
 
         res.render( 'composite1', {
-            'title' : webPageTitle,
-            'app.name' : webAppName,
             'tabComposite1Selected' : true,
             'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
@@ -224,7 +212,7 @@ app.get( '/api/composite1', function ( req, res ) {
  */
 app.get( '/api/composite2', function ( req, res ) {
 
-    var path = '/services/data/v40.0';
+    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
 
     conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
         'allOrNone' : true,
@@ -251,9 +239,80 @@ app.get( '/api/composite2', function ( req, res ) {
     }, function( error, response ) {
 
         res.render( 'composite2', {
-            'title' : webPageTitle,
-            'app.name' : webAppName,
             'tabComposite2Selected' : true,
+            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
+        });
+
+    });
+
+});
+
+/*
+    Composite REST API (example 3)
+
+    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
+    https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
+
+    Creates an account, contact, opportunity, and assigns primary contact role to the opportunity.
+    Again, the entire request counts as a single call toward your API limits.
+    No side effects from email alerts or triggers will have fired if any error.
+ */
+app.get( '/api/composite3', function ( req, res ) {
+
+    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
+
+    conn.requestPost( path + '/composite', {                        // <instance>/services/data/v40.0/composite
+        'allOrNone' : true,
+        'compositeRequest' : [
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/Account',                 // <instance>/services/data/v40.0/sobjects/Account
+                'referenceId' : 'BagginsAccount',
+                'body' : {
+                    'Name' : 'Baggins',
+                    'BillingStreet' : 'Bag End on Bagshot Row',
+                    'BillingCity' : 'Hobbiton',
+                    'BillingState' : 'Shire'
+                }
+            },
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/Contact',                 // <instance>/services/data/v40.0/sobjects/Contact
+                'referenceId' : 'BilboContact',
+                'body' : {
+                    'AccountId' : '@{BagginsAccount.id}',
+                    'FirstName' : 'Bilbo',
+                    'LastName' : 'Baggins'
+                }
+            },
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/Opportunity',             // <instance>/services/data/v40.0/sobjects/Opportunity
+                'referenceId' : 'BilboBirthdayOppty',
+                'body' : {
+                    'AccountId' : '@{BagginsAccount.id}',
+                    'Name' : 'Bilbo Baggins 111th Birthday',
+                    'StageName' : 'Prospecting',
+                    'CloseDate' : new Date( 2017, 8, 22 ),
+                    'Amount' : 5000
+                }
+            },
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/OpportunityContactRole',  // <instance>/services/data/v40.0/sobjects/OpportunityContactRole
+                'referenceId' : 'BilboOpptyContactRole',
+                'body' : {
+                    'OpportunityId' : '@{BilboBirthdayOppty.id}',
+                    'ContactId' : '@{BilboContact.id}',
+                    'Role' : 'Evaluator',
+                    'IsPrimary' : true
+                }
+            }
+        ]
+    }, function( error, response ) {
+
+        res.render( 'composite3', {
+            'tabComposite3Selected' : true,
             'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
@@ -279,7 +338,7 @@ app.get( '/api/composite2', function ( req, res ) {
  */
 app.get( '/api/tree', function ( req, res ) {
 
-    var path = '/services/data/v40.0';
+    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
 
     conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v40.0/composite/tree/Account
         'records' : [
@@ -335,11 +394,20 @@ app.get( '/api/tree', function ( req, res ) {
         ] // end tree
     }, function( error, response ) {
 
-        res.render( 'api_response', {
-            'title' : webPageTitle,
-            'app.name' : webAppName,
+        if ( error ) {
+            // I've noticed that sobject tree api sends back
+            // 400 http status codes for api save errors
+            // and that jsforce throws a js error obj in these instances
+            // so to get back the json response from the api request
+            // we parse it out of the error's message
+            // https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm
+            // https://github.com/jsforce/jsforce/blob/1.8.0/lib/http-api.js#L241
+            response = JSON.parse( error.message );
+        }
+
+        res.render( 'tree', {
             'tabTreeSelected' : true,
-            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
+            'jsonResponse' : JSON.stringify( response, null, 2 )
         });
 
     });

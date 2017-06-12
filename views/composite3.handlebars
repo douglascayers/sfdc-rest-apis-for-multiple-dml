@@ -1,0 +1,143 @@
+<div class="slds-m-left_large slds-m-right_large">
+
+    <!-- load '/views/partials/requestResponseBtn.handlebars' -->
+    {{> requestResponseBtn}}
+
+    <div id="request" class="slds-grid">
+
+        <div class="slds-col">
+            <pre><code class="js slds-box">
+var conn = new jsforce.Connection({ ... });
+
+var path = '/services/data/v40.0';
+
+conn.requestPost( path + '/composite', {                        // &lt;instance&gt;/services/data/v40.0/composite
+    'allOrNone' : true,
+    'compositeRequest' : [
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/Account',                 // &lt;instance&gt;/services/data/v40.0/sobjects/Account
+            'referenceId' : 'BagginsAccount',
+            'body' : {
+                'Name'          : 'Baggins',
+                'BillingStreet' : 'Bag End on Bagshot Row',
+                'BillingCity'   : 'Hobbiton',
+                'BillingState'  : 'Shire'
+            }
+        },
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/Contact',                 // &lt;instance&gt;/services/data/v40.0/sobjects/Contact
+            'referenceId' : 'BilboContact',
+            'body' : {
+                'AccountId' : '@{BagginsAccount.id}',
+                'FirstName' : 'Bilbo',
+                'LastName'  : 'Baggins'
+            }
+        },
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/Opportunity',             // &lt;instance&gt;/services/data/v40.0/sobjects/Opportunity
+            'referenceId' : 'BilboBirthdayOppty',
+            'body' : {
+                'AccountId' : '@{BagginsAccount.id}',
+                'Name'      : 'Bilbo Baggins 111th Birthday',
+                'StageName' : 'Prospecting',
+                'CloseDate' : new Date( 2017, 8, 22 ),
+                'Amount'    : 5000
+            }
+        },
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/OpportunityContactRole',  // &lt;instance&gt;/services/data/v40.0/sobjects/OpportunityContactRole
+            'referenceId' : 'BilboOpptyContactRole',
+            'body' : {
+                'OpportunityId' : '@{BilboBirthdayOppty.id}',
+                'ContactId'     : '@{BilboContact.id}',
+                'Role'          : 'Evaluator',
+                'IsPrimary'     : true
+            }
+        }
+    ]
+}, function( error, response ) {
+    if ( error ) {
+        // handle error: no account, contact, opportunity, or contact role created
+        // all DML rolled back together
+    } else {
+        // account + contact + opportunity + contact role have been created!
+    }
+});
+            </code></pre>
+        </div>
+
+    </div>
+
+    <div id="response" class="slds-grid slds-hide">
+
+        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
+            <div class="slds-text-heading_medium">🙂 Happy Path</div>
+            <pre><code class="js slds-box">
+{{jsonResponse}}
+            </code></pre>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+            <div class="slds-text-heading_medium">🙁 Unhappy Path</div>
+            <pre><code class="js slds-box">
+{
+  "compositeResponse": [
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back since another operation in the same transaction failed."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "BagginsAccount"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back since another operation in the same transaction failed."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "BilboContact"
+    },
+    {
+      "body": [
+        {
+          "message": "Required fields are missing: [StageName]",
+          "errorCode": "REQUIRED_FIELD_MISSING",
+          "fields": [
+            "StageName"
+          ]
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "BilboBirthdayOppty"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back since another operation in the same transaction failed."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "BilboOpptyContactRole"
+    }
+  ]
+}
+            </code></pre>
+        </div>
+
+    </div>
+
+</div>

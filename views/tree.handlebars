@@ -1,0 +1,113 @@
+<div class="slds-m-left_large slds-m-right_large">
+
+    <!-- load '/views/partials/requestResponseBtn.handlebars' -->
+    {{> requestResponseBtn}}
+
+    <div id="request" class="slds-grid">
+
+        <div class="slds-col">
+            <pre><code class="js slds-box">
+var conn = new jsforce.Connection({ ... });
+
+var path = '/services/data/v40.0';
+
+conn.requestPost( path + '/composite/tree/Account', {   // &lt;instance&gt;/services/data/v40.0/composite/tree/Account
+    'records' : [
+        {
+            'attributes' : {
+                'type' : 'Account',
+                'referenceId' : 'DisneyAccount'
+            },
+            // account fields
+            'Name'          : 'Walt Disney World Resort',
+            'BillingStreet' : 'Walt Disney World Resort',
+            'BillingCity'   : 'Orlando',
+            'BillingState'  : 'Florida',
+            // child relationships
+            'Contacts' : {
+                'records' : [
+                    {
+                        'attributes' : {
+                            'type' : 'Contact',
+                            'referenceId' : 'WaltDisneyContact'
+                        },
+                        // contact fields
+                        'FirstName' : 'Walt',
+                        'LastName'  : 'Disney'
+                    },
+                    {
+                        'attributes' : {
+                            'type' : 'Contact',
+                            'referenceId' : 'RoyDisneyContact'
+                        },
+                        // contact fields
+                        'FirstName' : 'Roy',
+                        'LastName'  : 'Disney'
+                    },
+                ]
+            }, // end contacts
+            'Opportunities' : {
+                'records' : [
+                    {
+                        'attributes' : {
+                            'type' : 'Opportunity',
+                            'referenceId' : 'AmusementParksOppty'
+                        },
+                        // opportunity fields
+                        'Name'      : 'Amusement Parks',
+                        'StageName' : 'Prospecting',
+                        'CloseDate' : '1971-10-01',
+                        'Amount'    : 149.99
+                    }
+                ]
+            } // end opportunities
+        } // end account
+    ] // end tree
+}, function( error, response ) {
+    if ( error ) {
+        // handle error: no account or contact created
+        // all DML rolled back together
+    } else {
+        // account + contact have been created!
+    }
+});
+            </code></pre>
+        </div>
+
+    </div>
+
+    <div id="response" class="slds-grid slds-hide">
+
+        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
+            <div class="slds-text-heading_medium">🙂 Happy Path</div>
+            <pre><code class="js slds-box">
+{{jsonResponse}}
+            </code></pre>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+            <div class="slds-text-heading_medium">🙁 Unhappy Path</div>
+            <pre><code class="js slds-box">
+{
+  "hasErrors": true,
+  "results": [
+    {
+      "referenceId": "WaltDisneyContact",
+      "errors": [
+        {
+          "statusCode": "REQUIRED_FIELD_MISSING",
+          "message": "Required fields are missing: [LastName]",
+          "fields": [
+            "LastName"
+          ]
+        }
+      ]
+    }
+  ]
+}
+            </code></pre>
+        </div>
+
+    </div>
+
+</div>

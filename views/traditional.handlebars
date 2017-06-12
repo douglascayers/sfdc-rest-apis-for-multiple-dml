@@ -6,10 +6,11 @@
     <div id="request" class="slds-grid">
 
         <div class="slds-col">
-            <pre><code class="js slds-box">var conn = new jsforce.Connection({ ... });
+            <pre><code class="js slds-box">
+var conn = new jsforce.Connection({ ... });
 
 // try to create account...
-// POST &lt;instance&gt;/services/data/39.0/sobjects/Account
+// POST &lt;instance&gt;/services/data/v40.0/sobjects/Account
 conn.sobject( 'Account' ).create({
     'Name'          : 'Midwest Dreamin',
     'BillingStreet' : '17 E Monroe St',
@@ -19,7 +20,7 @@ conn.sobject( 'Account' ).create({
     if ( error ) { /* handle error */ }
     else {
         // created account, now try to create contact...
-        // POST &lt;instance&gt;/services/data/39.0/sobjects/Contact
+        // POST &lt;instance&gt;/services/data/v40.0/sobjects/Contact
         conn.sobject( 'Contact' ).create({
             'AccountId' : accountResponse.id,
             'FirstName' : 'Eric',
@@ -43,7 +44,7 @@ conn.sobject( 'Account' ).create({
     <div id="response" class="slds-grid slds-hide">
 
         <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
-            <div class="slds-text-heading_medium">Happy Path</div>
+            <div class="slds-text-heading_medium">🙂 Happy Path</div>
             <pre><code class="js slds-box">
 // account
 {{accountJsonResponse}}
@@ -54,7 +55,7 @@ conn.sobject( 'Account' ).create({
         </div>
 
         <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
-            <div class="slds-text-heading_medium">Unhappy Path</div>
+            <div class="slds-text-heading_medium">🙁 Unhappy Path</div>
             <pre><code class="js slds-box">
 // account
 {
