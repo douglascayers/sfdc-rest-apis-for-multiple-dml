@@ -23,8 +23,8 @@ By night he can be found blogging about his Salesforce exploits at https://dougl
 Getting Started
 ---------------
 
-2. Install [NodeJS](https://nodejs.org). I used v8.0 on Windows (x64)
-3. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
+1. Install [NodeJS](https://nodejs.org). I used v8.0 on Windows (x64)
+2. Create a [connected app](https://help.salesforce.com/articleView?id=connected_app_create.htm&type=0&language=en_US) in your Salesforce developer org
 
   (a) Provide **Connected App Name**
 
@@ -38,12 +38,12 @@ Getting Started
 
 ![screen shot](images/connected-app2.png)
 
-4. Clone this project
+3. Clone this project
 ```
 git clone https://github.com/DouglasCAyers/sfdc-rest-apis-for-multiple-dml.git
 cd sfdc-rest-apis-for-multiple-dml
 ```
-5. In the project folder, create a file named `.env` that includes the following properties:
+4. In the project folder, create a file named `.env` that includes the following properties:
 ```
 SFDC_CLIENT_KEY=your connected app consumer key
 SFDC_CLIENT_SECRET=your connected app consumer secret
@@ -52,9 +52,9 @@ SFDC_TOKEN=your salesforce token
 SFDC_USERNAME=your salesforce username
 SFDC_API_VERSION=40.0
 ```
-6. Create the apex class `/src/classes/MyApexRestService.cls` in your Salesforce developer org
-7. Run the app locally from command line via `node app.js`
-8. In your browser go to http://localhost:8080/
+5. Create the apex class `/src/classes/MyApexRestService.cls` in your Salesforce developer org
+6. Run the app locally from command line via `node app.js`
+7. In your browser go to http://localhost:8080/
 
 
 Usage
