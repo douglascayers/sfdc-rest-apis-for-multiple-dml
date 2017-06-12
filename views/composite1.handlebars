@@ -17,7 +17,7 @@ conn.requestPost( path + '/composite', {            // &lt;instance&gt;/services
         {
             'method' : 'POST',
             'url' : path + '/sobjects/Account',     // &lt;instance&gt;/services/data/v40.0/sobjects/Account
-            'referenceId' : 'GearsAccount',
+            <span class="code-callout">'referenceId' : 'GearsAccount'</span>,
             'body' : {
                 'Name'          : 'GearsCRM',
                 'BillingStreet' : '10 Kearney Road, Suite 152',
@@ -30,7 +30,7 @@ conn.requestPost( path + '/composite', {            // &lt;instance&gt;/services
             'url' : path + '/sobjects/Contact',     // &lt;instance&gt;/services/data/v40.0/sobjects/Contact
             'referenceId' : 'GearsContact',
             'body' : {
-                'AccountId' : '@{GearsAccount.id}',
+                'AccountId' : <span class="code-callout">'@{GearsAccount.id}'</span>,
                 'FirstName' : 'Harry',
                 'LastName'  : 'Radenberg'
             }
