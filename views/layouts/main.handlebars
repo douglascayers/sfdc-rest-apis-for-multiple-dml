@@ -19,6 +19,7 @@
         <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
 
         <style>
+
           /* https://stackoverflow.com/questions/248011/how-do-i-wrap-text-in-a-pre-tag */
           pre {
               white-space: pre-wrap;       /* Since CSS 2.1 */
@@ -28,9 +29,15 @@
               word-wrap: break-word;       /* Internet Explorer 5.5+ */
           }
 
+          /* https://stackoverflow.com/questions/7300760/prevent-line-break-of-span-element */
+          .text-nowrap {
+              white-space: nowrap;
+          }
+
           .slds-form-element__label {
             font-weight: bold;
           }
+
         </style>
 
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
