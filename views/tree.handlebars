@@ -29,7 +29,7 @@ conn.requestPost( path + '/composite/tree/Account', {   // &lt;instance&gt;/serv
                     {
                         'attributes' : {
                             'type' : 'Contact',
-                            'referenceId' : 'WaltDisneyContact'
+                            <span class="code-callout">'referenceId' : 'WaltDisneyContact'</span>
                         },
                         // contact fields
                         'FirstName' : 'Walt',
@@ -38,7 +38,7 @@ conn.requestPost( path + '/composite/tree/Account', {   // &lt;instance&gt;/serv
                     {
                         'attributes' : {
                             'type' : 'Contact',
-                            'referenceId' : 'RoyDisneyContact'
+                            <span class="code-callout">'referenceId' : 'RoyDisneyContact'</span>
                         },
                         // contact fields
                         'FirstName' : 'Roy',
@@ -51,13 +51,38 @@ conn.requestPost( path + '/composite/tree/Account', {   // &lt;instance&gt;/serv
                     {
                         'attributes' : {
                             'type' : 'Opportunity',
-                            'referenceId' : 'AmusementParksOppty'
+                            <span class="code-callout">'referenceId' : 'AmusementParksOppty'</span>
                         },
                         // opportunity fields
                         'Name'      : 'Amusement Parks',
                         'StageName' : 'Prospecting',
                         'CloseDate' : '1971-10-01',
-                        'Amount'    : 149.99
+                        'PriceBook2Id' : '01s1a000001KwKU',
+                        // child relationships
+                        'OpportunityLineItems' : {
+                            'records' : [
+                                {
+                                    'attributes' : {
+                                        'type' : 'OpportunityLineItem',
+                                        <span class="code-callout">'referenceId' : 'OpptyLineItem1'</span>
+                                    },
+                                    // opportunity line item fields
+                                    'PriceBookEntryId' : '01u1a000000wWfY',
+                                    'Quantity' : 5,
+                                    'UnitPrice' : 100.00
+                                },
+                                {
+                                    'attributes' : {
+                                        'type' : 'OpportunityLineItem',
+                                        <span class="code-callout">'referenceId' : 'OpptyLineItem2'</span>
+                                    },
+                                    // opportunity line item fields
+                                    'PriceBookEntryId' : '01u1a000000wWfd',
+                                    'Quantity' : 2,
+                                    'UnitPrice' : 250.00
+                                }
+                            ]
+                        } // end opportunity line items
                     }
                 ]
             } // end opportunities
@@ -65,10 +90,10 @@ conn.requestPost( path + '/composite/tree/Account', {   // &lt;instance&gt;/serv
     ] // end tree
 }, function( error, response ) {
     if ( error ) {
-        // handle error: no account or contact created
+        // handle error: no records created
         // all DML rolled back together
     } else {
-        // account + contact have been created!
+        // records hierarchy has been created!
     }
 });
             </code></pre>

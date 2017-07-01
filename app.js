@@ -148,7 +148,7 @@ app.get( '/api/apex', function ( req, res ) {
 });
 
 /*
-    Composite REST API (example 1)
+    Composite REST API (overview)
 
     https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
     https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
@@ -158,106 +158,19 @@ app.get( '/api/apex', function ( req, res ) {
     The response bodies and HTTP statuses of the requests are returned in a single response body.
     The entire request counts as a single call toward your API limits.
     No side effects from email alerts or triggers will have fired if any error.
- */
-app.get( '/api/composite1', function ( req, res ) {
 
-    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
+    Can have up to 25 sub requests; 5 of which can be queries.
+    Each sub request runs in its own trigger context as the current user,
+    which means if have 3 account sub requests then trigger fires 3 times, once per sub request.
+    However, all sub requests together count towards governor limits for a single transaction.
 
-    conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
-        'allOrNone' : true,
-        'compositeRequest' : [
-            {
-                'method' : 'POST',
-                'url' : path + '/sobjects/Account',     // <instance>/services/data/v40.0/sobjects/Account
-                'referenceId' : 'GearsAccount',
-                'body' : {
-                    'Name' : 'GearsCRM',
-                    'BillingStreet' : '10 Kearney Road, Suite 152',
-                    'BillingCity' : 'Needham',
-                    'BillingState' : 'Massachusetts'
-                }
-            },
-            {
-                'method' : 'POST',
-                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v40.0/sobjects/Contact
-                'referenceId' : 'GearsContact',
-                'body' : {
-                    'AccountId' : '@{GearsAccount.id}',
-                    'FirstName' : 'Harry',
-                    'LastName' : 'Radenberg'
-                }
-            }
-        ]
-    }, function( error, response ) {
-
-        res.render( 'composite1', {
-            'tabComposite1Selected' : true,
-            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
-        });
-
-    });
-
-});
-
-/*
-    Composite REST API (example 2)
-
-    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
-    https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
-
-    First request queries for existing account then
-    subsequent request creates a new contact at that account.
-    Again, the entire request counts as a single call toward your API limits.
+    This example creates an account, contact, opportunity, and assigns primary contact role to the opportunity.
+    It queries for the price book and price book entry ids and adds products to the opportunity.
+    Again, the entire composite request counts as a single call toward your API limits.
+    However, all sub requests together count towards governor limits for a single transaction.
     No side effects from email alerts or triggers will have fired if any error.
  */
-app.get( '/api/composite2', function ( req, res ) {
-
-    var path = '/services/data/v' + process.env.SFDC_API_VERSION;
-
-    conn.requestPost( path + '/composite', {            // <instance>/services/data/v40.0/composite
-        'allOrNone' : true,
-        'compositeRequest' : [
-            {
-                'method' : 'GET',                       // <instance>/services/data/v40.0/query
-                'url' : path + '/query/?q=' +
-                    // encode url for "application/x-www-form-urlencoded" parameters by further replacing '%20' (space) with '+'
-                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
-                    encodeURIComponent("SELECT id FROM Account WHERE name = 'GearsCRM' ORDER BY CreatedDate DESC LIMIT 1").replace(/%20/g, '+' ),
-                'referenceId' : 'AccountResults'
-            },
-            {
-                'method' : 'POST',
-                'url' : path + '/sobjects/Contact',     // <instance>/services/data/v40.0/sobjects/Contact
-                'referenceId' : 'NewContact',
-                'body' : {
-                    'AccountId' : '@{AccountResults.records[0].Id}',
-                    'FirstName' : 'Doug',
-                    'LastName' : 'Ayers'
-                }
-            }
-        ]
-    }, function( error, response ) {
-
-        res.render( 'composite2', {
-            'tabComposite2Selected' : true,
-            'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
-        });
-
-    });
-
-});
-
-/*
-    Composite REST API (example 3)
-
-    https://developer.salesforce.com/blogs/tech-pubs/2017/01/simplify-your-api-code-with-new-composite-resources.html
-    https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
-
-    Creates an account, contact, opportunity, and assigns primary contact role to the opportunity.
-    Again, the entire request counts as a single call toward your API limits.
-    No side effects from email alerts or triggers will have fired if any error.
- */
-app.get( '/api/composite3', function ( req, res ) {
+app.get( '/api/composite', function ( req, res ) {
 
     var path = '/services/data/v' + process.env.SFDC_API_VERSION;
 
@@ -286,6 +199,11 @@ app.get( '/api/composite3', function ( req, res ) {
                 }
             },
             {
+                'method' : 'GET',                                   // <instance>/services/data/v40.0/query
+                'url' : path + '/query/?q=' + 'SELECT id FROM PriceBook2 WHERE isStandard = true LIMIT 1',
+                'referenceId' : 'PriceBookResults'
+            },
+            {
                 'method' : 'POST',
                 'url' : path + '/sobjects/Opportunity',             // <instance>/services/data/v40.0/sobjects/Opportunity
                 'referenceId' : 'BilboBirthdayOppty',
@@ -294,7 +212,7 @@ app.get( '/api/composite3', function ( req, res ) {
                     'Name' : 'Bilbo Baggins 111th Birthday',
                     'StageName' : 'Prospecting',
                     'CloseDate' : new Date( 2017, 8, 22 ),
-                    'Amount' : 5000
+                    'PriceBook2Id' : '@{PriceBookResults.records[0].Id}'
                 }
             },
             {
@@ -307,12 +225,41 @@ app.get( '/api/composite3', function ( req, res ) {
                     'Role' : 'Evaluator',
                     'IsPrimary' : true
                 }
+            },
+            // Just to show what's possible and to be generally agnostic to which dev org this runs in,
+            // we query for price book entry ids rather than hard code them. In practice, get them however fits your app's needs.
+            {
+                'method' : 'GET',                                   // <instance>/services/data/v40.0/query
+                'url' : path + '/query/?q=' + 'SELECT id FROM PriceBookEntry WHERE priceBook2Id = \'@{PriceBookResults.records[0].Id}\' AND isActive = true LIMIT 2',
+                'referenceId' : 'PriceBookEntryResults'
+            },
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/OpportunityLineItem',     // <instance>/services/data/v40.0/sobjects/OpportunityLineItem
+                'referenceId' : 'OpptyLineItem1',
+                'body' : {
+                    'OpportunityId' : '@{BilboBirthdayOppty.id}',
+                    'PriceBookEntryId' : '@{PriceBookEntryResults.records[0].Id}',
+                    'Quantity' : 5,
+                    'UnitPrice' : 1000.00
+                }
+            },
+            {
+                'method' : 'POST',
+                'url' : path + '/sobjects/OpportunityLineItem',     // <instance>/services/data/v40.0/sobjects/OpportunityLineItem
+                'referenceId' : 'OpptyLineItem2',
+                'body' : {
+                    'OpportunityId' : '@{BilboBirthdayOppty.id}',
+                    'PriceBookEntryId' : '@{PriceBookEntryResults.records[1].Id}',
+                    'Quantity' : 2,
+                    'UnitPrice' : 2500.00
+                }
             }
         ]
     }, function( error, response ) {
 
-        res.render( 'composite3', {
-            'tabComposite3Selected' : true,
+        res.render( 'composite', {
+            'tabCompositeSelected' : true,
             'jsonResponse' : JSON.stringify( ( error || response ), null, 2 )
         });
 
@@ -333,83 +280,160 @@ app.get( '/api/composite3', function ( req, res ) {
 
     The request can contain the following:
         * Up to a total of 200 records across all trees
-        * Up to five records of different types
-        * SObject trees up to five levels deep
+        * Up to 5 records of different types
+        * SObject trees up to 5 levels deep
+
+    Is bulk friendly in that all records per level of tree are inserted together.
+        * All root level records
+        * Then all 2nd level records
+        * Then all 3rd level records
+        * Then all 4th level records
+        * Finally all 5th level records
+
+    That means a trigger will be passed one or more records as compared to Composite API that saves each record individually.
  */
 app.get( '/api/tree', function ( req, res ) {
 
     var path = '/services/data/v' + process.env.SFDC_API_VERSION;
 
-    conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v40.0/composite/tree/Account
-        'records' : [
-            {
-                'attributes' : {
-                    'type' : 'Account',
-                    'referenceId' : 'DisneyAccount'
-                },
-                // account fields
-                'Name' : 'Walt Disney World Resort',
-                'BillingStreet' : 'Walt Disney World Resort',
-                'BillingCity' : 'Orlando',
-                'BillingState' : 'Florida',
-                // child relationships
-                'Contacts' : {
-                    'records' : [
-                        {
-                            'attributes' : {
-                                'type' : 'Contact',
-                                'referenceId' : 'WaltDisneyContact'
-                            },
-                            // contact fields
-                            'FirstName' : 'Walt',
-                            'LastName' : 'Disney'
-                        },
-                        {
-                            'attributes' : {
-                                'type' : 'Contact',
-                                'referenceId' : 'RoyDisneyContact'
-                            },
-                            // contact fields
-                            'FirstName' : 'Roy',
-                            'LastName' : 'Disney'
-                        },
-                    ]
-                }, // end contacts
-                'Opportunities' : {
-                    'records' : [
-                        {
-                            'attributes' : {
-                                'type' : 'Opportunity',
-                                'referenceId' : 'AmusementParksOppty'
-                            },
-                            // opportunity fields
-                            'Name' : 'Amusement Parks',
-                            'StageName' : 'Prospecting',
-                            'CloseDate' : '1971-10-01',
-                            'Amount' : 149.99
-                        }
-                    ]
-                } // end opportunities
-            } // end account
-        ] // end tree
-    }, function( error, response ) {
+    // Unlike the composite api example that could query for price book and price book entry ids,
+    // the sobject tree api does not perform queries, only creates records. So to mimic the composite
+    // api example then we must first query for the necessary ids or obtain them somehow.
 
-        if ( error ) {
-            // I've noticed that sobject tree api sends back
-            // 400 http status codes for api save errors
-            // and that jsforce throws a js error obj in these instances
-            // so to get back the json response from the api request
-            // we parse it out of the error's message
-            // https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm
-            // https://github.com/jsforce/jsforce/blob/1.8.0/lib/http-api.js#L241
-            response = JSON.parse( error.message );
-        }
+    var priceBook;
+    var priceBookEntries;
+
+    conn.query( formURLEncodeQuery( `SELECT id FROM PriceBook2 WHERE isStandard = true LIMIT 1` ) )
+    .then( function( result ) {
+
+        priceBook = result.records[0];
+        return conn.query( formURLEncodeQuery( `SELECT id FROM PriceBookEntry WHERE priceBook2Id = '${priceBook.Id}' AND isActive = true LIMIT 2` ) );
+
+    }).then( function( result ) {
+
+        priceBookEntries = result.records;
+
+    }).then( function() {
+
+        conn.requestPost( path + '/composite/tree/Account', {   // <instance>/services/data/v40.0/composite/tree/Account
+            'records' : [
+                {
+                    'attributes' : {
+                        'type' : 'Account',
+                        'referenceId' : 'DisneyAccount'
+                    },
+                    // account fields
+                    'Name' : 'Walt Disney World Resort',
+                    'BillingStreet' : 'Walt Disney World Resort',
+                    'BillingCity' : 'Orlando',
+                    'BillingState' : 'Florida',
+                    // child relationships
+                    'Contacts' : {
+                        'records' : [
+                            {
+                                'attributes' : {
+                                    'type' : 'Contact',
+                                    'referenceId' : 'WaltDisneyContact'
+                                },
+                                // contact fields
+                                'FirstName' : 'Walt',
+                                'LastName' : 'Disney'
+                            },
+                            {
+                                'attributes' : {
+                                    'type' : 'Contact',
+                                    'referenceId' : 'RoyDisneyContact'
+                                },
+                                // contact fields
+                                'FirstName' : 'Roy',
+                                'LastName' : 'Disney'
+                            },
+                        ]
+                    }, // end contacts
+                    'Opportunities' : {
+                        'records' : [
+                            {
+                                'attributes' : {
+                                    'type' : 'Opportunity',
+                                    'referenceId' : 'AmusementParksOppty'
+                                },
+                                // opportunity fields
+                                'Name' : 'Amusement Parks',
+                                'StageName' : 'Prospecting',
+                                'CloseDate' : '1971-10-01',
+                                'PriceBook2Id' : priceBook.Id,
+                                // child relationships
+                                'OpportunityLineItems' : {
+                                    'records' : [
+                                        {
+                                            'attributes' : {
+                                                'type' : 'OpportunityLineItem',
+                                                'referenceId' : 'OpptyLineItem1'
+                                            },
+                                            // opportunity line item fields
+                                            'PriceBookEntryId' : priceBookEntries[0].Id,
+                                            'Quantity' : 5,
+                                            'UnitPrice' : 1250.00
+                                        },
+                                        {
+                                            'attributes' : {
+                                                'type' : 'OpportunityLineItem',
+                                                'referenceId' : 'OpptyLineItem2'
+                                            },
+                                            // opportunity line item fields
+                                            'PriceBookEntryId' : priceBookEntries[1].Id,
+                                            'Quantity' : 2,
+                                            'UnitPrice' : 3189.79
+                                        }
+                                    ]
+                                } // end opportunity line items
+                            }
+                        ]
+                    } // end opportunities
+                } // end account
+            ] // end tree
+        }, function( error, response ) {
+
+            if ( error ) {
+                // I've noticed that sobject tree api sends back
+                // 400 http status codes for api save errors
+                // and that jsforce throws a js error obj in these instances
+                // so to get back the json response from the api request
+                // we parse it out of the error's message
+                // https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/errorcodes.htm
+                // https://github.com/jsforce/jsforce/blob/1.8.0/lib/http-api.js#L241
+                response = JSON.parse( error.message );
+            }
+
+            res.render( 'tree', {
+                'tabTreeSelected' : true,
+                'jsonResponse' : JSON.stringify( response, null, 2 )
+            });
+
+        });
+
+    }).catch( function( err ) {
+
+        console.error( err );
 
         res.render( 'tree', {
             'tabTreeSelected' : true,
-            'jsonResponse' : JSON.stringify( response, null, 2 )
+            'jsonResponse' : JSON.stringify( err, null, 2 )
         });
 
     });
 
 });
+
+app.get( '/api/comparison', function ( req, res ) {
+
+    res.render( 'comparison', {
+        'tabComparisonSelected' : true
+    });
+
+});
+
+function formURLEncodeQuery( query ) {
+    // encode url for "application/x-www-form-urlencoded" parameters by further replacing '%20' (space) with '+'
+    return query.replace( /%20/g, '+' );
+}

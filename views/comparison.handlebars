@@ -1,0 +1,98 @@
+<div class="slds-m-left_large slds-m-right_large">
+
+    <table class="slds-box slds-table slds-table--bordered slds-table--cell-buffer slds-table--col-bordered slds-m-vertical_small">
+        <thead>
+            <tr class="slds-text-title--caps">
+                <th scope="col">Approach</th>
+                <th scope="col">API Limits</th>
+                <th scope="col">Transaction Control</th>
+                <th scope="col">Triggers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Traditional</td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>1 per request</li>
+                        <li>Up to 1 record</li>
+                        <li>Up to 1 object type</li>
+                    </ul>
+                </td>
+                <td style="color:red">
+                    ✖ No
+                </td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>Fire per request</li>
+                        <li>Single record only</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>Custom Apex</td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>1 per request</li>
+                        <li>Apex DML & SOQL Limits</li>
+                    </ul>
+                </td>
+                <td style="color:green">
+                    ✔ Yes, SavePoints
+                </td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>As efficient as DML coded</li>
+                    </ul>
+                    ¯\_(ツ)_/¯
+                </td>
+            </tr>
+            <tr>
+                <td>Composite</td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>1 per composite request</li>
+                        <li>Up to 25 sub-requests</li>
+                        <li>Up to 25 different objects</li>
+                    </ul>
+                </td>
+                <td style="color:green">
+                    ✔ Yes, allOrNone
+                </td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>Fire per sub-request</li>
+                        <li>Single record only</li>
+                    </ul>
+                    🙁
+                </td>
+            </tr>
+            <tr>
+                <td>SObject Tree</td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>1 per tree request</li>
+                        <li>Up to 200 records</li>
+                        <li>Up to 5 different objects</li>
+                        <li>Up to 5 levels deep</li>
+                    </ul>
+                </td>
+                <td style="color:green">
+                    ✔ Yes, inherent
+                </td>
+                <td>
+                    <ul style="list-style-type:disc" class="slds-m-left_small">
+                        <li>Fire in batches</li>
+                        <li>All root records</li>
+                        <li>Then 2nd level records</li>
+                        <li>Then 3rd level records</li>
+                        <li>Then 4th level records</li>
+                        <li>Then 5th level records</li>
+                    </ul>
+                    🙂
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>

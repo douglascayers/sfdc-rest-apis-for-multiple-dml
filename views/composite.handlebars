@@ -17,9 +17,9 @@ conn.requestPost( path + '/composite', {                        // &lt;instance&
         {
             'method' : 'POST',
             'url' : path + '/sobjects/Account',                 // &lt;instance&gt;/services/data/v40.0/sobjects/Account
-            'referenceId' : 'BagginsAccount',
+            'referenceId' : <span class="code-callout">'BagginsAccount'</span>,
             'body' : {
-                'Name'          : 'Baggins',
+                'Name' : 'Baggins',
                 'BillingStreet' : 'Bag End on Bagshot Row',
                 'BillingCity'   : 'Hobbiton',
                 'BillingState'  : 'Shire'
@@ -30,21 +30,26 @@ conn.requestPost( path + '/composite', {                        // &lt;instance&
             'url' : path + '/sobjects/Contact',                 // &lt;instance&gt;/services/data/v40.0/sobjects/Contact
             'referenceId' : 'BilboContact',
             'body' : {
-                'AccountId' : '@{BagginsAccount.id}',
+                'AccountId' : <span class="code-callout">'@{BagginsAccount.id}'</span>,
                 'FirstName' : 'Bilbo',
                 'LastName'  : 'Baggins'
             }
+        },
+        {
+            'method' : 'GET',                                   // &lt;instance&gt;/services/data/v40.0/query
+            'url' : path + '/query/?q=' + "SELECT id FROM PriceBook2 WHERE isStandard = true LIMIT 1",
+            'referenceId' : <span class="code-callout">'PriceBookResults'</span>
         },
         {
             'method' : 'POST',
             'url' : path + '/sobjects/Opportunity',             // &lt;instance&gt;/services/data/v40.0/sobjects/Opportunity
             'referenceId' : 'BilboBirthdayOppty',
             'body' : {
-                'AccountId' : '@{BagginsAccount.id}',
-                'Name'      : 'Bilbo Baggins 111th Birthday',
-                'StageName' : 'Prospecting',
-                'CloseDate' : new Date( 2017, 8, 22 ),
-                'Amount'    : 5000
+                'AccountId'    : <span class="code-callout">'@{BagginsAccount.id}'</span>,
+                'Name'         : 'Bilbo Baggins 111th Birthday',
+                'StageName'    : 'Prospecting',
+                'CloseDate'    : new Date( 2017, 8, 22 ),
+                'PriceBook2Id' : <span class="code-callout">'@{PriceBookResults.records[0].Id}'</span>
             }
         },
         {
@@ -52,10 +57,41 @@ conn.requestPost( path + '/composite', {                        // &lt;instance&
             'url' : path + '/sobjects/OpportunityContactRole',  // &lt;instance&gt;/services/data/v40.0/sobjects/OpportunityContactRole
             'referenceId' : 'BilboOpptyContactRole',
             'body' : {
-                'OpportunityId' : '@{BilboBirthdayOppty.id}',
-                'ContactId'     : '@{BilboContact.id}',
+                'OpportunityId' : <span class="code-callout">'@{BilboBirthdayOppty.id}'</span>,
+                'ContactId'     : <span class="code-callout">'@{BilboContact.id}'</span>,
                 'Role'          : 'Evaluator',
                 'IsPrimary'     : true
+            }
+        },
+        {
+            'method' : 'GET',                                   // &lt;instance&gt;/services/data/v40.0/query
+            'url' : path + '/query/?q=' + (
+                  "SELECT id FROM PriceBookEntry " +
+                  "WHERE priceBook2Id = <span class="code-callout">'@{PriceBookResults.records[0].Id}'</span> " +
+                  "AND isActive = true LIMIT 2"
+            ),
+            'referenceId' : <span class="code-callout">'PriceBookEntryResults'</span>
+        },
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/OpportunityLineItem',     // &lt;instance&gt;/services/data/v40.0/sobjects/OpportunityLineItem
+            'referenceId' : 'OpptyLineItem1',
+            'body' : {
+                'OpportunityId'    : '@{BilboBirthdayOppty.id}',
+                'PriceBookEntryId' : <span class="code-callout">'@{PriceBookEntryResults.records[0].Id}'</span>,
+                'Quantity'         : 5,
+                'UnitPrice'        : 1000.00
+            }
+        },
+        {
+            'method' : 'POST',
+            'url' : path + '/sobjects/OpportunityLineItem',     // &lt;instance&gt;/services/data/v40.0/sobjects/OpportunityLineItem
+            'referenceId' : 'OpptyLineItem2',
+            'body' : {
+                'OpportunityId'    : '@{BilboBirthdayOppty.id}',
+                'PriceBookEntryId' : <span class="code-callout">'@{PriceBookEntryResults.records[1].Id}'</span>,
+                'Quantity'         : 2,
+                'UnitPrice'        : 2500.00
             }
         }
     ]
@@ -101,12 +137,23 @@ conn.requestPost( path + '/composite', {                        // &lt;instance&
       "body": [
         {
           "errorCode": "PROCESSING_HALTED",
-          "message": "The transaction was rolled back since another operation in the same transaction failed."
+          "message": "The transaction was rolled back..."
         }
       ],
       "httpHeaders": {},
       "httpStatusCode": 400,
       "referenceId": "BilboContact"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back..."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "PriceBookResults"
     },
     {
       "body": [
@@ -126,12 +173,45 @@ conn.requestPost( path + '/composite', {                        // &lt;instance&
       "body": [
         {
           "errorCode": "PROCESSING_HALTED",
-          "message": "The transaction was rolled back since another operation in the same transaction failed."
+          "message": "The transaction was rolled back..."
         }
       ],
       "httpHeaders": {},
       "httpStatusCode": 400,
       "referenceId": "BilboOpptyContactRole"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back..."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "PriceBookEntryResults"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back..."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "OpptyLineItem1"
+    },
+    {
+      "body": [
+        {
+          "errorCode": "PROCESSING_HALTED",
+          "message": "The transaction was rolled back..."
+        }
+      ],
+      "httpHeaders": {},
+      "httpStatusCode": 400,
+      "referenceId": "OpptyLineItem2"
     }
   ]
 }

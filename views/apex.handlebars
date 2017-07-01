@@ -1,58 +1,7 @@
 <div class="slds-m-left_large slds-m-right_large">
 
-    <div class="slds-grid slds-p-vertical_small">
-
-        <div class="slds-form-element__control">
-            <div class="slds-radio_button-group">
-                <span class="slds-button slds-radio_button">
-                    <input type="radio" name="radio" id="apexBtn" checked="checked">
-                    <label class="slds-radio_button__label" for="apexBtn">
-                        <span class="slds-radio_faux">Apex</span>
-                    </label>
-                </span>
-                <span class="slds-button slds-radio_button">
-                    <input type="radio" name="radio" id="requestBtn">
-                    <label class="slds-radio_button__label" for="requestBtn">
-                        <span class="slds-radio_faux">Request</span>
-                    </label>
-                </span>
-                <span class="slds-button slds-radio_button">
-                    <input type="radio" name="radio" id="responseBtn">
-                    <label class="slds-radio_button__label" for="responseBtn">
-                        <span class="slds-radio_faux">Response</span>
-                    </label>
-                </span>
-            </div>
-        </div>
-
-        <script>
-            $(function() {
-
-                $('#apexBtn').change( function() {
-                    if ( $(this).is(':checked') ) {
-                        $('#apex').removeClass('slds-hide');
-                        $('#request,#response').addClass('slds-hide');
-                    }
-                });
-
-                $('#requestBtn').change( function() {
-                    if ( $(this).is(':checked') ) {
-                        $('#request').removeClass('slds-hide');
-                        $('#apex,#response').addClass('slds-hide');
-                    }
-                });
-
-                $('#responseBtn').change( function() {
-                    if ( $(this).is(':checked') ) {
-                        $('#response').removeClass('slds-hide');
-                        $('#apex,#request').addClass('slds-hide');
-                    }
-                });
-
-            });
-        </script>
-
-    </div>
+    <!-- load '/views/partials/requestResponseBtn.handlebars' -->
+    {{> requestResponseBtn}}
 
     <div id="apex" class="slds-grid">
 
@@ -73,8 +22,8 @@ global class MyApexRestService {
             Account acct = new Account(
                 name = request.company,
                 billingStreet = request.street,
-                billingCity = request.city,
-                billingState = request.state
+                billingCity   = request.city,
+                billingState  = request.state
             );
 
             insert acct;
@@ -82,7 +31,7 @@ global class MyApexRestService {
             Contact cont = new Contact(
                 accountId = acct.id,
                 firstName = request.firstName,
-                lastName = request.lastName
+                lastName  = request.lastName
             );
 
             insert cont;
