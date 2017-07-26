@@ -1,17 +1,24 @@
+<style>
+    .slds-table [role="columnheader"],
+    .slds-table [role="rowheader"] {
+        font-weight: bold;
+    }
+</style>
+
 <div class="slds-m-left_large slds-m-right_large">
 
     <table class="slds-box slds-table slds-table--bordered slds-table--cell-buffer slds-table--col-bordered slds-m-vertical_small">
         <thead>
             <tr class="slds-text-title--caps">
-                <th scope="col">Approach</th>
-                <th scope="col">API Limits</th>
-                <th scope="col">Transaction Control</th>
-                <th scope="col">Triggers</th>
+                <th scope="col" role="columnheader">Approach</th>
+                <th scope="col" role="columnheader">API Limits</th>
+                <th scope="col" role="columnheader">Transaction Control</th>
+                <th scope="col" role="columnheader">Triggers</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Traditional</td>
+                <td role="rowheader">Traditional</td>
                 <td>
                     <ul style="list-style-type:disc" class="slds-m-left_small">
                         <li>1 per request</li>
@@ -30,7 +37,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Custom Apex</td>
+                <td role="rowheader">Custom Apex</td>
                 <td>
                     <ul style="list-style-type:disc" class="slds-m-left_small">
                         <li>1 per request</li>
@@ -48,7 +55,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Composite</td>
+                <td role="rowheader">Composite</td>
                 <td>
                     <ul style="list-style-type:disc" class="slds-m-left_small">
                         <li>1 per composite request</li>
@@ -68,7 +75,7 @@
                 </td>
             </tr>
             <tr>
-                <td>SObject Tree</td>
+                <td role="rowheader">SObject Tree</td>
                 <td>
                     <ul style="list-style-type:disc" class="slds-m-left_small">
                         <li>1 per tree request</li>
