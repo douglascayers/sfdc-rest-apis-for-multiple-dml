@@ -72,5 +72,4 @@ The web app has tabs that demonstrate API behavior. Here is description and purp
 | Custom Apex | Overcomes multiple API requests by exposing a custom endpoint. The transaction and rollback logic are in the apex class. |
 | Composite | No need for custom apex code, also overcomes multiple API requests by using Composite API that bundles the requests together in an "all or none" fashion. |
 | SObject Tree | Specialized variant of the Composite API for creating a record and related list records in a single API call and transaction. |
-| Composite 2 | Another example of using Composite API, this time querying for existing data and piping that into the new records to be created. |
-| Composite 3 | Another example that pipes data from previous sub-request into subsequent sub-requests to create account, contact, opportunity, and contact role. |
+| PepUp Tech | PepUp Tech.org, non-profit highlighted at Midwest Dreamin 2017 |
