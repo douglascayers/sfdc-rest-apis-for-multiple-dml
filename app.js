@@ -52,6 +52,12 @@ app.get( '/', function( req, res ) {
     });
 });
 
+app.get( '/pepUpTech', function( req, res ) {
+    res.render( 'pepuptech', {
+        'tabPepUpTechSelected' : true
+    });
+});
+
 /*
     Traditional Approach
 
