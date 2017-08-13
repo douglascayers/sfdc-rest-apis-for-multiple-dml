@@ -8,6 +8,8 @@ See real code and live demos of **Apex REST Services**, **Composite API**, and *
 Avoid troublesome rollback scenarios and burning through API requests of traditional development
 and learn to design efficient, robust integrations with the Salesforce REST API.
 
+[![screen shot](images/youtube-banner.png)](https://www.youtube.com/watch?v=ILRGWlo6SeU)
+
 
 About the Speaker
 -----------------
